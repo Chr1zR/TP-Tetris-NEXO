@@ -9,17 +9,18 @@ DNI: 12345678
 Usuario: OsoMark
 Entrega: Sí
 
-Apellido: Busolín, Agustín Osvaldo 
+Apellido: Busolín, Agustín Osvaldo
 DNI: 44792752
 Usuario: agusbuso
 Entrega: Sí
 */
 
 #include <stdio.h>
-#include<GBT/gbt.h>
-
+#include "../include/juego.h"
 
 int main(){
-	printf("Hola Mundo\n");
+	if(!iniciar_juego()){
+        return -1;
+	}
 	return 0;
 }
