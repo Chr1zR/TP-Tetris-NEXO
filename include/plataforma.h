@@ -2,6 +2,8 @@
 #define PLATAFORMA_H_INCLUDED
 
 #include<stdio.h>
-int iniciar_plataforma(char* nombreVentana, size_t tam);
+#include<GBT/gbt.h>
 
+int iniciar_plataforma(char* nombreVentana, size_t tam);
+void parar_plataforma(tGBT_Temporizador* temporizador);
 #endif // PLATAFORMA_H_INCLUDED
