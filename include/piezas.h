@@ -1,6 +1,7 @@
 #ifndef PIEZAS_H_INCLUDED
 #define PIEZAS_H_INCLUDED
 #include <stdint.h>
+#include <stdbool.h>
 #include "../include/config.h"  //TAM_BLOQUE
 #include "../include/paleta.h"  //define colores
 
@@ -23,53 +24,195 @@ typedef struct{
     uint16_t x,y;
 }tTetromino;
 
-static const uint8_t tetromino_I[4][4] = {
-    {0, 0, 0, 0},
-    {C, C, C, C},
-    {0, 0, 0, 0},
-    {0, 0, 0, 0}
+static const uint8_t tetromino_I_rotaciones[4][4][4] = {
+    {
+        {C, C, C, C},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {C, 0, 0, 0},
+        {C, 0, 0, 0},
+        {C, 0, 0, 0},
+        {C, 0, 0, 0}
+    },
+    {
+        {C, C, C, C},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {C, 0, 0, 0},
+        {C, 0, 0, 0},
+        {C, 0, 0, 0},
+        {C, 0, 0, 0}
+    }
 };
-static const uint8_t tetromino_J[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {A, 0, 0, 0},
-    {A, A, A, 0}
+static const uint8_t tetromino_J_rotaciones[4][4][4] = {
+    {
+        {A, 0, 0, 0},
+        {A, A, A, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {A, A, 0, 0},
+        {A, 0, 0, 0},
+        {A, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {A, A, A, 0},
+        {0, 0, A, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, A, 0, 0},
+        {0, A, 0, 0},
+        {A, A, 0, 0},
+        {0, 0, 0, 0}
+    }
 };
-static const uint8_t tetromino_L[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, 0, 0, NA},
-    {0, NA, NA, NA}
+static const uint8_t tetromino_L_rotaciones[4][4][4] = {
+    {
+        {0, 0,  NA, 0},
+        {NA,NA, NA, 0},
+        {0, 0,  0,  0},
+        {0, 0,  0,  0}
+    },
+    {
+        {NA,0,  0,  0},
+        {NA,0,  0,  0},
+        {NA,NA, 0,  0},
+        {0, 0,  0,  0}
+    },
+    {
+        {NA,NA,NA,  0},
+        {NA,0,  0,  0},
+        {0, 0,  0,  0},
+        {0, 0,  0,  0}
+    },
+    {
+        {NA,NA, 0,  0},
+        {0, NA, 0,  0},
+        {0, NA, 0,  0},
+        {0, 0,  0,  0}
+    }
 };
-static const uint8_t tetromino_O[4][4] = {
-    {0, 0, 0, 0},
-    {0, AM, AM, 0},
-    {0, AM, AM, 0},
-    {0, 0, 0, 0}
+static const uint8_t tetromino_O_rotaciones[4][4][4] = {
+    {
+        {AM,AM, 0, 0},
+        {AM,AM, 0, 0},
+        {0, 0,  0, 0},
+        {0, 0,  0, 0}
+    },
+    {
+        {AM,AM, 0, 0},
+        {AM,AM, 0, 0},
+        {0, 0,  0, 0},
+        {0, 0,  0, 0}
+    },
+    {
+        {AM,AM, 0, 0},
+        {AM,AM, 0, 0},
+        {0, 0,  0, 0},
+        {0, 0,  0, 0}
+    },
+    {
+        {AM,AM, 0, 0},
+        {AM,AM, 0, 0},
+        {0, 0,  0, 0},
+        {0, 0,  0, 0}
+    }
 };
-static const uint8_t tetromino_S[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, V, V, 0},
-    {V, V, 0, 0}
+static const uint8_t tetromino_S_rotaciones[4][4][4] = {
+    {
+        {0, V, V, 0},
+        {V, V, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {V, 0, 0, 0},
+        {V, V, 0, 0},
+        {0, V, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, V, V, 0},
+        {V, V, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {V, 0, 0, 0},
+        {V, V, 0, 0},
+        {0, V, 0, 0},
+        {0, 0, 0, 0}
+    }
 };
-static const uint8_t tetromino_T[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, M, 0, 0},
-    {M, M, M, 0}
+static const uint8_t tetromino_T_rotaciones[4][4][4] = {
+    {
+        {0, M, 0, 0},
+        {M, M, M, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {M, 0, 0, 0},
+        {M, M, 0, 0},
+        {M, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {M, M, M, 0},
+        {0, M, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, M, 0, 0},
+        {M, M, 0, 0},
+        {0, M, 0, 0},
+        {0, 0, 0, 0}
+    }
 };
-static const uint8_t tetromino_Z[4][4] = {
-    {0, 0, 0, 0},
-    {0, 0, 0, 0},
-    {0, R, R, 0},
-    {0, 0, R, R}
+static const uint8_t tetromino_Z_rotaciones[4][4][4] = {
+    {
+        {R, R, 0, 0},
+        {0, R, R, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, R, 0, 0},
+        {R, R, 0, 0},
+        {R, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {R, R, 0, 0},
+        {0, R, R, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, R, 0, 0},
+        {R, R, 0, 0},
+        {R, 0, 0, 0},
+        {0, 0, 0, 0}
+    }
 };
 
 
 tTetromino* tetrominoCrear();
 void tetrominoAleatorio(tTetromino* t, char col);
 void tetrominoCopiar(tTetromino* destino, tTetromino* origen);
-//void rotar_tetromino(Tetromino* t);
+void tetrominoRotar(tTetromino* tetro, bool sentido_derecha);
+void tetrominoBajar(tTetromino* tetro);
+const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotacion);
 void tTetromino_Destruir(tTetromino* t);
 #endif // PIEZAS_H_INCLUDED

@@ -4,33 +4,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h> //printf
-//DibujarFondo();
-//DibujarTablero();
-//DibujarHUD();
-///funciones tTablero
-tTablero* crear_tablero(const char filas, const char columnas){
 
-    if(filas <= 0 || columnas <= 0){
+///funciones tTablero
+tTablero* crear_tablero(tConfigPantalla* config)
+{
+    if(!config || config->filas <= 0 || config->columnas <= 0)
+    {
         return NULL;
     }
     tTablero* tablero = malloc(sizeof(tTablero));
 
-    if(!tablero){
+    if(!tablero)
+    {
         return NULL;
     }
-
-    tablero->tablero = calloc(filas, sizeof(unsigned char *));
-    if(!(tablero -> tablero)){
-
+    tablero->tablero = calloc(config->filas, sizeof(unsigned char *));
+    if(!(tablero -> tablero))
+    {
         free(tablero);
         return NULL;
     }
-    for(size_t i = 0; i < filas; i++){
-
-        tablero->tablero[i] = calloc(columnas, sizeof(unsigned char));
-        if(!tablero->tablero [i]){
-            for(size_t j = 0;j < i ;j++){
-
+    for(size_t i = 0; i < config->filas; i++)
+    {
+        tablero->tablero[i] = calloc(config->columnas, sizeof(unsigned char));
+        if(!tablero->tablero [i])
+        {
+            for(size_t j = 0; j < i ; j++)
+            {
                 free(tablero->tablero[j]);
             }
             free(tablero->tablero);
@@ -38,191 +38,180 @@ tTablero* crear_tablero(const char filas, const char columnas){
             return NULL;
         }
     }
-    tablero->filas = filas;
-    tablero->columnas = columnas;
+    tablero->filas = config->filas;
+    tablero->columnas = config->columnas;
     tablero->puntos = 0;
     tablero->lineas_limpias = 0;
 
     tablero->pieza_actual = tetrominoCrear();
-    if(!tablero->pieza_actual){
-
+    if(!tablero->pieza_actual)
+    {
         vaciar_tablero(tablero);
         tablero = NULL;
         return NULL;
     }
     tablero->pieza_siguiente = tetrominoCrear();
-    if(!tablero->pieza_siguiente){
-
+    if(!tablero->pieza_siguiente)
+    {
         vaciar_tablero(tablero);
         tablero = NULL;
         return NULL;
     }
-
     return tablero;
 }
-void vaciar_tablero(tTablero* tablero){
-
-    if(!tablero){
+void vaciar_tablero(tTablero* tablero)
+{
+    if(!tablero)
+    {
         return;
     }
-    if(tablero->tablero){
-        for(size_t i = 0; i < tablero->filas; i++){
-
+    if(tablero->tablero)
+    {
+        for(size_t i = 0; i < tablero->filas; i++)
+        {
             free(tablero->tablero[i]);
         }
-    free(tablero->tablero);
-    tablero->tablero = NULL;
+        free(tablero->tablero);
+        tablero->tablero = NULL;
     }
-    if(tablero->pieza_actual){
-
+    if(tablero->pieza_actual)
+    {
         tTetromino_Destruir(tablero->pieza_actual);
         tablero->pieza_actual = NULL;
     }
-    if(tablero->pieza_siguiente){
-
+    if(tablero->pieza_siguiente)
+    {
         tTetromino_Destruir(tablero->pieza_siguiente);
         tablero->pieza_siguiente = NULL;
     }
     free(tablero);
 }
-void tableroDibujar(tTablero* tablero){
+///Funciones dibujar
+void fondoDibujar(tTablero* tablero, tConfigPantalla* config)
+{
+    if(!tablero || !config)
+    {
+        return;
+    }
+//=======================================================
+///                     Cuadriacula
+//=======================================================
+    uint16_t i,j,y,x;
 
-    ///Cuadriacula
-    const uint16_t offsetX = 0;
-    const uint16_t offsetY = 100;
-    uint16_t y;
-    uint16_t x;
-
-    for(y = 0; y < ALTO_TABLERO; y++){
-
-        for(x = 0; x < ANCHO_TABLERO; x++){
-
-            gbt_dibujar_pixel(offsetX + x, offsetY + y, N);
+    for(i = config->offset_tablero_y; i < config->offset_tablero_y + config->alto_tablero; i++)
+    {
+        for(j = config->offset_tablero_x; j < config->offset_tablero_x + config->ancho_tablero; j++)
+        {
+            gbt_dibujar_pixel(j, i, N);
         }
     }
     //Lineas verticales
-    for(uint16_t col = 0; col < COLUMNAS + 1; col++){
-        x = offsetX + (col * TAM_BLOQUE);
-
-        for(y = 0; y < ALTO_TABLERO; y++){
-
-            gbt_dibujar_pixel(x,offsetY + y, CC);
+    for(j = 0; j < config->columnas + 1; j++)
+    {
+        x = config->offset_tablero_x + (j * config->tam_bloque);
+        for(i = 0; i < config->alto_tablero; i++)
+        {
+            gbt_dibujar_pixel(x,config->offset_tablero_y + i, CC);
         }
-
     }
     //Lineas horizontales
-    for(uint16_t fila = 0; fila < FILAS + 1; fila++){
-        y = offsetY + (fila * TAM_BLOQUE);
-
-        for(x = 0; x < ANCHO_TABLERO; x++){
-
-            gbt_dibujar_pixel(offsetX + x, y, CC);
+    for(i = 0; i < config->filas + 1; i++)
+    {
+        y = config->offset_tablero_y + (i * config->tam_bloque);
+        for(j = 0; j < config->ancho_tablero; j++)
+        {
+            gbt_dibujar_pixel(config->offset_tablero_x + j, y, CC);
         }
-
     }
-
 }
-///Funciones dibujar
-void bloqueDibujar(uint16_t x_pantalla, uint16_t y_pantalla, uint8_t color){
-
-    for(uint8_t i = 0; i < TAM_BLOQUE; i++){
-
-        for(uint8_t j = 0; j < TAM_BLOQUE; j++){
-
+void bloqueDibujar(uint16_t x_pantalla, uint16_t y_pantalla, uint8_t color, tConfigPantalla* config)
+{
+    for(uint8_t i = 0; i < config->tam_bloque; i++)
+    {
+        for(uint8_t j = 0; j < config->tam_bloque; j++)
+        {
             gbt_dibujar_pixel(x_pantalla + i, y_pantalla + j, color);
         }
     }
 }
-void piezasAncladasDibujar(tTablero* t){
-
-    if(!t || !(t->tablero)){
+void piezasAncladasDibujar(tTablero* t, tConfigPantalla* config)
+{
+    if(!t || !(t->tablero))
+    {
         return;
     }
-
-    for(uint8_t i = 0; i < t->filas; i++){
-
-        for(uint8_t j = 0; j < t->columnas; j++){
-
-            if(t->tablero[i][j] != 0){
-
-                bloqueDibujar(j * TAM_BLOQUE, ALTO_VGA_VENTANA - ALTO_TABLERO + i * TAM_BLOQUE, t->tablero[i][j]);
+    for(uint8_t i = 0; i < config->filas; i++)
+    {
+        for(uint8_t j = 0; j < config->columnas; j++)
+        {
+            if(t->tablero[i][j] != 0)
+            {
+                bloqueDibujar(config->offset_tablero_x + j * config->tam_bloque, config->offset_tablero_y + i * config->tam_bloque, t->tablero[i][j], config);
             }
         }
     }
 }
-void piezaActualDibujar(tTetromino* tetro){
-
-    if(!tetro){
+void piezaActualDibujar(tTetromino* tetro, tConfigPantalla* config)
+{
+    if(!tetro)
+    {
         return;
     }
-    for(uint8_t i = 0; i < 4; i++){
-
-        for(uint8_t j = 0; j < 4; j++){
-
-            if(tetro->matriz[i][j] != 0){
-
-                bloqueDibujar((tetro->x + j) * TAM_BLOQUE, ALTO_VGA_VENTANA - ALTO_TABLERO + (tetro->y + i)* TAM_BLOQUE, tetro->matriz[i][j]);
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        for(uint8_t j = 0; j < 4; j++)
+        {
+            if(tetro->matriz[i][j] != 0)
+            {
+                bloqueDibujar(config->offset_tablero_x + (tetro->x + j) * config->tam_bloque, config->offset_tablero_y + (tetro->y + i)* config->tam_bloque, tetro->matriz[i][j], config);
             }
         }
     }
 }
+
 ///Funciones logica
-void tableroActualizarEstado(tTablero* t, bool* game_over){
-
-    if(!t || !t->pieza_actual){
+void tableroActualizarEstado(tTablero* t, bool* game_over)
+{
+    if(!t || !t->pieza_actual)
+    {
         return;
     }
-
 //=======================================================
     printf("=== Antes: pieza actual: tipo=%d, x=%d, y=%d\n",
-             t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
+           t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
 //=======================================================
     t->pieza_actual->y++;
-
-    if(posicionValida(t->pieza_actual, t)){
-
+    if(posicionValida(t->pieza_actual, t))
+    {
 //=======================================================
         printf("    Posicion valida, continua bajando\n");
 //=======================================================
         return;
     }
-
 //=======================================================
     printf("    Posicion INVALIDA, ancla\n");
 //=======================================================
-
     t->pieza_actual->y--;
-
     piezaAnclar(t->pieza_actual, t);
-
 //=======================================================
     printf("    Pieza anclada en y=%d\n", t->pieza_actual->y);
 //=======================================================
-
     lineasLimpiar(t);
-
     tetrominoCopiar(t->pieza_actual, t->pieza_siguiente);
-
 //=======================================================
-     printf("    Nueva pieza actual (era siguiente): tipo=%d, x=%d, y=%d\n",
-             t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
+    printf("    Nueva pieza actual (era siguiente): tipo=%d, x=%d, y=%d\n",
+           t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
 //=======================================================
-
     tetrominoAleatorio(t->pieza_siguiente, t->columnas);
-
 //=======================================================
     printf("    Nueva pieza siguiente generada: tipo=%d, x=%d\n",
-             t->pieza_siguiente->tipo, t->pieza_siguiente->x);
+           t->pieza_siguiente->tipo, t->pieza_siguiente->x);
 //=======================================================
-
-
-
-    if(!posicionValida(t->pieza_actual, t)){
-
+    if(!posicionValida(t->pieza_actual, t))
+    {
 //=======================================================
-    printf("    ERROR: Nueva pieza actual NO es valida! GAME OVER\n");
+        printf("    ERROR: Nueva pieza actual NO es valida! GAME OVER\n");
 //=======================================================
-
         *game_over = true;
         return;
     }
@@ -230,109 +219,150 @@ void tableroActualizarEstado(tTablero* t, bool* game_over){
     printf("    Nueva pieza actual es valida\n\n");
 //=======================================================
 }
-bool posicionValida(tTetromino* tetro, tTablero* t){
-
-    if(!tetro || !t){
+bool posicionValida(tTetromino* tetro, tTablero* t)
+{
+    if(!tetro || !t)
+    {
         return false;
     }
-
     int x_tablero, y_tablero;
-
-    for(uint8_t i = 0; i < 4; i++){
-
-        for(uint8_t j = 0; j < 4; j++){
-
-            if(tetro->matriz[i][j]){
-
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        for(uint8_t j = 0; j < 4; j++)
+        {
+            if(tetro->matriz[i][j])
+            {
                 x_tablero = tetro->x + j;
                 y_tablero = tetro->y + i;
-
                 // Validacion limites
                 if(x_tablero < 0 || x_tablero >= t->columnas ||
-                    y_tablero < 0 || y_tablero >= t->filas){
+                        y_tablero < 0 || y_tablero >= t->filas)
+                {
                     return false;
                 }
-
                 // colisión
-                if(t->tablero[y_tablero][x_tablero] != 0){
+                if(t->tablero[y_tablero][x_tablero] != 0)
+                {
                     return false;
                 }
             }
         }
     }
-
     return true;
 }
 ///Funciones validantes
-bool puedeBajar(tTetromino* tetro, tTablero* t){
-
-    if(!tetro || !t){
+bool puedeBajar(tTetromino* tetro, tTablero* t)
+{
+    if(!tetro || !t)
+    {
         return false;
     }
     tetro->y++;
-
     bool valido = posicionValida(tetro, t);
-
     tetro->y--;
-
     return valido;
 }
-bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t){
-
-    if(!tetro || !t){
+bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t)
+{
+    if(!tetro || !t)
+    {
         return false;
     }
-
     tetro->x--;
-
     bool valido = posicionValida(tetro, t);
-
     tetro->x++;
-
     return valido;
 }
-bool puedeMoverDerecha(tTetromino* tetro, tTablero* t){
-
-    if(!tetro || !t){
+bool puedeMoverDerecha(tTetromino* tetro, tTablero* t)
+{
+    if(!tetro || !t)
+    {
         return false;
     }
     tetro->x++;
-
     bool valido = posicionValida(tetro, t);
-
     tetro->x--;
-
     return valido;
 }
+static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTablero* t)
+{
 
-void piezaAnclar(tTetromino* tetro, tTablero* t){
+    if(!matriz || !t)
+    {
+        return false;
+    }
+    int x_tab,y_tab;
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
+        {
 
+            if(matriz[i * 4 + j])
+            {
+                x_tab = x + j;
+                y_tab = y + i;
+
+                if(x_tab < 0 || x_tab >= t->columnas ||
+                        y_tab < 0 || y_tab >= t->filas)
+                {
+                    return false;
+                }
+                if(t->tablero[y_tab][x_tab] != 0)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+bool puedeRotar(tTetromino* tetro, tTablero* t, bool sentido_derecha)
+{
+    if(!tetro || !t)
+    {
+        return false;
+    }
+    uint8_t nueva_rotacion;
+    if(sentido_derecha)
+    {
+        nueva_rotacion = (tetro->rotacion + 1) % 4;
+    }
+    else
+    {
+        nueva_rotacion = (tetro->rotacion + 3) % 4;
+    }
+    const uint8_t* nueva_matriz = tetrominoObtenerMatrizRotacion(tetro->tipo, nueva_rotacion);
+    if(!nueva_matriz)
+    {
+        return false;
+    }
+    return validarMatrizEnPosicion(tetro->x, tetro->y, nueva_matriz, t);
+}
+
+void piezaAnclar(tTetromino* tetro, tTablero* t)
+{
     uint8_t i,j,x,y;
-
-
-    for(i = 0; i < 4; i++){
-
-        for(j = 0; j < 4; j++){
-
-            if(tetro->matriz[i][j]){
-
+    for(i = 0; i < 4; i++)
+    {
+        for(j = 0; j < 4; j++)
+        {
+            if(tetro->matriz[i][j])
+            {
                 x = tetro->x + j;
                 y = tetro->y + i;
-
-                if(x >= t->columnas || y >= t->filas){
-
+                if(x >= t->columnas || y >= t->filas)
+                {
                     return; //Si el bloque no cabe, cancelamos anclaje
                 }
             }
         }
     }
-
-    for(i = 0; i < 4; i++){
-
-        for(j = 0; j < 4; j++){
-
-            if(tetro->matriz[i][j]){
-
+    for(i = 0; i < 4; i++)
+    {
+        for(j = 0; j < 4; j++)
+        {
+            if(tetro->matriz[i][j])
+            {
                 x = tetro->x + j;
                 y = tetro->y + i;
                 t->tablero[y][x] = tetro->matriz[i][j];
@@ -340,47 +370,39 @@ void piezaAnclar(tTetromino* tetro, tTablero* t){
         }
     }
 }
-void lineasLimpiar(tTablero* t){
-
-    if(!t){
+void lineasLimpiar(tTablero* t)
+{
+    if(!t)
+    {
         return;
     }
-
     bool llena;
-
-    for(int y = 0; y < t->filas; y++){
-
+    for(int y = 0; y < t->filas; y++)
+    {
         llena = true;
-
         // verificar fila completa
-        for(int x = 0; x < t->columnas; x++){
-
-            if(t->tablero[y][x] == 0){
-
+        for(int x = 0; x < t->columnas; x++)
+        {
+            if(t->tablero[y][x] == 0)
+            {
                 llena = false;
                 break;
             }
         }
-
-        if(llena){
-
+        if(llena)
+        {
             // guardar puntero de la fila eliminada
             unsigned char* filaEliminada = t->tablero[y];
-
             // mover punteros hacia abajo
-            for(int fila = y; fila > 0; fila--){
-
+            for(int fila = y; fila > 0; fila--)
+            {
                 t->tablero[fila] = t->tablero[fila - 1];
             }
-
             // reutilizar la fila eliminada arriba
             t->tablero[0] = filaEliminada;
-
             // vaciar contenido
             memset(t->tablero[0], 0, t->columnas * sizeof(unsigned char));
-
             t->lineas_limpias++;
-
             y--;
         }
     }

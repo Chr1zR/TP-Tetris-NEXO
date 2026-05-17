@@ -19,6 +19,29 @@ tTetromino* tetrominoCrear(){
 
     return tetromino;
 }
+const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotacion){
+
+    if(rotacion > 3) rotacion = rotacion % 4;
+
+    switch(tipo){
+        case TETROMINO_I:
+            return (const uint8_t*)tetromino_I_rotaciones[rotacion];
+        case TETROMINO_J:
+            return (const uint8_t*)tetromino_J_rotaciones[rotacion];
+        case TETROMINO_L:
+            return (const uint8_t*)tetromino_L_rotaciones[rotacion];
+        case TETROMINO_O:
+            return (const uint8_t*)tetromino_O_rotaciones[rotacion];
+        case TETROMINO_S:
+            return (const uint8_t*)tetromino_S_rotaciones[rotacion];
+        case TETROMINO_T:
+            return (const uint8_t*)tetromino_T_rotaciones[rotacion];
+        case TETROMINO_Z:
+            return (const uint8_t*)tetromino_Z_rotaciones[rotacion];
+        default:
+            return NULL;
+    }
+}
 void tetrominoAleatorio(tTetromino* tetromino, char col){
 
     if(!tetromino){
@@ -26,39 +49,19 @@ void tetrominoAleatorio(tTetromino* tetromino, char col){
     }
 
     tetromino->tipo = rand() % 7;
+    tetromino->rotacion = 0;
 
-    switch(tetromino->tipo){
-
-        case TETROMINO_I:
-            memcpy(tetromino->matriz, tetromino_I, sizeof(tetromino_I));
-            break;
-        case TETROMINO_J:
-            memcpy(tetromino->matriz, tetromino_J, sizeof(tetromino_J));
-            break;
-        case TETROMINO_L:
-            memcpy(tetromino->matriz, tetromino_L, sizeof(tetromino_L));
-            break;
-        case TETROMINO_O:
-            memcpy(tetromino->matriz, tetromino_O, sizeof(tetromino_O));
-            break;
-        case TETROMINO_S:
-            memcpy(tetromino->matriz, tetromino_S, sizeof(tetromino_S));
-            break;
-        case TETROMINO_T:
-            memcpy(tetromino->matriz, tetromino_T, sizeof(tetromino_T));
-            break;
-        case TETROMINO_Z:
-            memcpy(tetromino->matriz, tetromino_Z, sizeof(tetromino_Z));
-            break;
-        default:
-
+    const uint8_t* matriz = tetrominoObtenerMatrizRotacion(tetromino->tipo, 0);
+    if(matriz){
+        memcpy(tetromino->matriz, matriz, 16);
     }
+
     tetromino ->x = rand() % (col -3);
     tetromino ->y = 0;
 }
 void tetrominoBajar(tTetromino* t){
 
-    t->y+=TAM_BLOQUE;
+    t->y++;
 }
 void tetrominoCopiar(tTetromino* destino, tTetromino* origen){
 
@@ -71,6 +74,25 @@ void tetrominoCopiar(tTetromino* destino, tTetromino* origen){
     destino->rotacion = origen->rotacion;
 
     memcpy(destino->matriz, origen->matriz, sizeof(origen->matriz));
+}
+void tetrominoRotar(tTetromino* tetro, bool sentido_derecha){
+
+    if(!tetro){
+        return;
+    }
+
+    uint8_t nueva_rotacion;
+    if(sentido_derecha){
+        nueva_rotacion = (tetro->rotacion + 1) % 4;
+    } else {
+        nueva_rotacion = (tetro->rotacion + 3) % 4;
+    }
+
+    const uint8_t* nueva_matriz = tetrominoObtenerMatrizRotacion(tetro->tipo, nueva_rotacion);
+    if(nueva_matriz){
+        memcpy(tetro->matriz, nueva_matriz, 16);
+        tetro->rotacion = nueva_rotacion;
+    }
 }
 void tTetromino_Destruir(tTetromino* t){
 

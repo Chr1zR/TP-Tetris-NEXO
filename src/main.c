@@ -18,8 +18,9 @@ Entrega: Sí
 #include <stdio.h>
 #include "../include/juego.h"
 
-int main(){
-	if(!iniciar_juego()){
+int main(int argc, char* argv[]){
+
+	if(!iniciar_juego(argc, argv)){
         return -1;
 	}
 	return 0;

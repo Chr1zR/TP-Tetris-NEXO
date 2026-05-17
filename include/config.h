@@ -1,26 +1,57 @@
 #ifndef CONFIG_H_INCLUDED
 #define CONFIG_H_INCLUDED
 
-#define ANCHO_VGA_VENTANA 640
-#define ALTO_VGA_VENTANA 480
-#define ESCALA_VENTANA 1
+#include <stdint.h>
 
-#define ANCHO_HUD 640       //offset_x = 0
-#define ALTO_HUD 100     //offset_y = 0
+typedef struct {
 
-#define ANCHO_TABLERO 190   //offset_x = 0
-#define ALTO_TABLERO 380   //offset_y = 100
+    uint16_t offset_x_inicial;
+    uint16_t offset_y_inicial;
+    uint16_t offset_x_final;
+    uint16_t offset_y_final;
+}tPosHud;
 
-#define ANCHO_SCORE 450      //offset_x = 190
-#define ALTO_SCORE 380     //offset_y = 100
 
-#define PX_PADDING 4
+typedef struct{
+    tPosHud next;
+    tPosHud score;
+    tPosHud nivel;
+    tPosHud lineas;
+    tPosHud nombre;
+    tPosHud piezas;
+    tPosHud tiempo;
+}tDisposicionHud;
 
-///tTablero
-#define FILAS 20
-#define COLUMNAS 10
+typedef struct {
+    //Ventana fisica
+    uint16_t ancho_ventana; //CGA = 320x200
+    uint16_t alto_ventana;  //VGA = 640x480(default)
+    uint8_t escala;
 
-///tTetromino
-#define TAM_BLOQUE 19
+    //Variables a calcular
+    uint16_t ancho_tablero;
+    uint16_t alto_tablero;
+    uint16_t tam_bloque;
+    uint16_t ancho_hud_izq;
+    uint16_t ancho_hud_der;
+    uint16_t offset_tablero_x;
+    uint16_t offset_tablero_y;
+
+    uint8_t columnas;
+    uint8_t filas;
+
+    tDisposicionHud hud;
+
+}tConfigPantalla;
+
+
+
+tConfigPantalla* crear_config_default();
+tConfigPantalla* crear_config(char* argv[]);
+void configDestruir(tConfigPantalla* config);
+void anchosCalcular(tConfigPantalla* config);
+uint8_t modalidadObtener();
+uint8_t columnasDeluxeObtener();
+
 
 #endif // CONFIG_H_INCLUDED

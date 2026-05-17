@@ -5,16 +5,17 @@
 #include "../include/config.h"
 #include "../include/errores.h"
 #include "../include/paleta.h"
-int iniciar_plataforma(char* nombreVentana, size_t tam){
+
+int iniciar_plataforma(char* nombreVentana, size_t tam, tConfigPantalla* config){
 
     if (gbt_iniciar() != 0) {
         fprintf(stderr, "Error al iniciar GBT: %s\n", gbt_obtener_log());
         return ERROR_INICIALIZACION;
     }
 
-    snprintf(nombreVentana, tam, "Ventana %dx%d",ANCHO_VGA_VENTANA, ALTO_VGA_VENTANA);
+    snprintf(nombreVentana, tam, "Ventana %dx%d",config->ancho_ventana, config->alto_ventana);
 
-    if (gbt_crear_ventana(nombreVentana, ANCHO_VGA_VENTANA, ALTO_VGA_VENTANA, ESCALA_VENTANA) != 0) {
+    if (gbt_crear_ventana(nombreVentana, config->ancho_ventana, config->alto_ventana, config->escala) != 0) {
         fprintf(stderr, "Error al iniciar el modulo de graficos de GBT: %s\n", gbt_obtener_log());
         gbt_cerrar();
         return ERROR_INICIALIZACION;
@@ -28,9 +29,14 @@ int iniciar_plataforma(char* nombreVentana, size_t tam){
     }
     return TODO_OK;
 }
-void parar_plataforma(tGBT_Temporizador* temporizador){
+void parar_plataforma(tGBT_Temporizador* temporizador, tGBT_Temporizador* temporizador_s){
     if(temporizador){
         gbt_temporizador_destruir(temporizador);
+        temporizador = NULL;
+    }
+    if(temporizador_s){
+        gbt_temporizador_destruir(temporizador_s);
+        temporizador_s = NULL;
     }
     gbt_destruir_ventana();
     gbt_cerrar();
