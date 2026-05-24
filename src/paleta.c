@@ -15,5 +15,6 @@ tGBT_ColorRGB paletaCGA[CANT_COLORES] = {
     {0x04, 0xBF, 0xBF}, //10  Celeste claro
     {0x02, 0x68, 0x73}, //11  Celeste oscuro
     {0x01, 0x1F, 0x26}, //12  Azul oscuro
-    {0xFF, 0xFF, 0xFF}  // 13:  Usado como transparente por GBT
+    {0x1A, 0x25, 0x30}, // 13:  Gris pizarra oscuro (HUD)
+    {0xFF, 0xFF, 0xFF}  // 14:  Usado como transparente por GBT
 };

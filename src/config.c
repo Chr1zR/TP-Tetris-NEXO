@@ -4,6 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+// static void tConfigInicializar(tConfigPantalla* config)
+// {
+//     config->filas = 20;
+//     config->tam_bloque = (config->alto_ventana - 6) / config->filas;
+//     config->alto_tablero = config->filas * config->tam_bloque;
+
+//     uint8_t modal = modalidadObtener();
+//     if (modal == 2) {
+//         config->columnas = columnasDeluxeObtener();
+//     } else {
+//         config->columnas = 10;
+//     }
+// }
+
 tConfigPantalla* crear_config_default(){
 
     tConfigPantalla* config = calloc(1,sizeof(tConfigPantalla));

@@ -38,28 +38,24 @@ tTablero* crear_tablero(tConfigPantalla* config)
             return NULL;
         }
     }
-    tablero->filas = config->filas;
-    tablero->columnas = config->columnas;
-    tablero->puntos = 0;
-    tablero->lineas_limpias = 0;
 
     tablero->pieza_actual = tetrominoCrear();
     if(!tablero->pieza_actual)
     {
-        vaciar_tablero(tablero);
+        vaciar_tablero(tablero, config);
         tablero = NULL;
         return NULL;
     }
     tablero->pieza_siguiente = tetrominoCrear();
     if(!tablero->pieza_siguiente)
     {
-        vaciar_tablero(tablero);
+        vaciar_tablero(tablero, config);
         tablero = NULL;
         return NULL;
     }
     return tablero;
 }
-void vaciar_tablero(tTablero* tablero)
+void vaciar_tablero(tTablero* tablero, tConfigPantalla* config)
 {
     if(!tablero)
     {
@@ -67,7 +63,7 @@ void vaciar_tablero(tTablero* tablero)
     }
     if(tablero->tablero)
     {
-        for(size_t i = 0; i < tablero->filas; i++)
+        for(uint8_t i = 0; i < config->filas; i++)
         {
             free(tablero->tablero[i]);
         }
@@ -86,6 +82,124 @@ void vaciar_tablero(tTablero* tablero)
     }
     free(tablero);
 }
+///Funciones tEstadoJuego
+tEstadoJuego* tEstadoCrear(){
+    tEstadoJuego* estado = (tEstadoJuego*)malloc(sizeof(tEstadoJuego));
+    
+    if (estado == NULL) {
+        return NULL;
+    }
+
+    estado->puntos = 0;
+    estado->lineas_limpias = 0;
+    estado->nivel = 0;
+
+    memset(estado->conteo_piezas, 0, sizeof(estado->conteo_piezas));
+
+    return estado;
+}
+void tEstadoDestruir(tEstadoJuego* estado)
+{
+    if (estado != NULL) {
+        free(estado);
+    }
+}
+
+///Dibuja solo las esquinas de un rectangulo neon (marco incompleto estilo imagen de referencia)
+static void neonEsquinas(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
+                          uint8_t color, uint16_t clen, uint16_t sw, uint16_t sh)
+{
+    for (uint16_t i = 0; i < clen; i++) {
+        // Trazos horizontales desde cada esquina
+        if (x0 + i < sw)                    gbt_dibujar_pixel(x0 + i, y0, color);
+        if (x1 >= i && x1 - i < sw)         gbt_dibujar_pixel(x1 - i, y0, color);
+        if (x0 + i < sw && y1 < sh)         gbt_dibujar_pixel(x0 + i, y1, color);
+        if (x1 >= i && x1 - i < sw && y1 < sh) gbt_dibujar_pixel(x1 - i, y1, color);
+        // Trazos verticales desde cada esquina
+        if (y0 + i < sh)                    gbt_dibujar_pixel(x0, y0 + i, color);
+        if (y1 >= i && y1 - i < sh)         gbt_dibujar_pixel(x0, y1 - i, color);
+        if (y0 + i < sh && x1 < sw)         gbt_dibujar_pixel(x1, y0 + i, color);
+        if (y1 >= i && y1 - i < sh && x1 < sw) gbt_dibujar_pixel(x1, y1 - i, color);
+    }
+}
+
+///Fondo temático Tron Legacy - ladrillado con marcos neon decorativos
+void fondoTronDibujar(tConfigPantalla* config)
+{
+    if (!config) return;
+
+    uint16_t tx = config->offset_tablero_x;
+    uint16_t ty = config->offset_tablero_y;
+    uint16_t tw = config->ancho_tablero;
+    uint16_t th = config->alto_tablero;
+    uint16_t sw = config->ancho_ventana;
+    uint16_t sh = config->alto_ventana;
+    uint16_t rx = tx + tw;  // inicio del panel HUD derecho
+
+    // === Fondo oscuro en paneles HUD (diferencia del tablero negro) ===
+    for (uint16_t y = 0; y < sh; y++)
+        for (uint16_t x = 0; x < sw; x++)
+            if (x < tx || x >= rx)
+                gbt_dibujar_pixel(x, y, GA);
+
+    // === Brillo neon en bordes del tablero ===
+    for (uint16_t y = ty; y <= ty + th; y++) {
+        if (tx >= 1) gbt_dibujar_pixel(tx - 1, y, CO);
+        if (tx >= 2) gbt_dibujar_pixel(tx - 2, y, A);
+        if (rx + 1 < sw) gbt_dibujar_pixel(rx + 1, y, CO);
+        if (rx + 2 < sw) gbt_dibujar_pixel(rx + 2, y, A);
+    }
+    for (uint16_t x = tx; x <= rx; x++) {
+        if (ty >= 1) gbt_dibujar_pixel(x, ty - 1, CO);
+        if (ty >= 2) gbt_dibujar_pixel(x, ty - 2, A);
+        if (ty + th + 1 < sh) gbt_dibujar_pixel(x, ty + th + 1, CO);
+        if (ty + th + 2 < sh) gbt_dibujar_pixel(x, ty + th + 2, A);
+    }
+
+    // === Marcos neon parciales decorativos (esquinas tipo bracket) ===
+    uint16_t clen = (sw >= 400) ? 14 : 7;
+    uint16_t pad  = 3;
+
+    // Panel izquierdo: marco superior (cyan) y marco inferior (magenta)
+    neonEsquinas(pad, pad, tx - pad, sh / 3,          CC, clen, sw, sh);
+    neonEsquinas(pad, sh * 2 / 3, tx - pad, sh - pad, M,  clen, sw, sh);
+
+    // Panel derecho: marco superior (amarillo) y marco inferior (cyan)
+    neonEsquinas(rx + pad, pad, sw - pad, sh / 3,          AM, clen, sw, sh);
+    neonEsquinas(rx + pad, sh * 2 / 3, sw - pad, sh - pad, CC, clen, sw, sh);
+
+    // === Acentos neon dispersos (puntos y guiones decorativos) ===
+    if (tx > 4 && sh > 10) {
+        uint16_t rdw = sw - rx;
+
+        // Panel izquierdo: pequeños puntos de 2px
+        if (tx / 3 < sw && sh / 5 + 1 < sh) {
+            gbt_dibujar_pixel(tx / 3,      sh / 5,     A);
+            gbt_dibujar_pixel(tx / 3,      sh / 5 + 1, A);
+        }
+        if (tx * 2 / 3 < tx && sh * 3 / 5 + 1 < sh) {
+            gbt_dibujar_pixel(tx * 2 / 3,  sh * 3 / 5,     M);
+            gbt_dibujar_pixel(tx * 2 / 3,  sh * 3 / 5 + 1, M);
+        }
+        // Guión horizontal
+        for (uint16_t i = 0; i < 4; i++)
+            if (tx / 5 + i < tx) gbt_dibujar_pixel(tx / 5 + i, sh * 2 / 5, CC);
+
+        // Panel derecho: pequeños puntos de 2px
+        if (rx + rdw * 3 / 4 < sw && sh / 4 + 1 < sh) {
+            gbt_dibujar_pixel(rx + rdw * 3 / 4, sh / 4,     AM);
+            gbt_dibujar_pixel(rx + rdw * 3 / 4, sh / 4 + 1, AM);
+        }
+        if (rx + rdw / 3 < sw && sh * 3 / 4 + 1 < sh) {
+            gbt_dibujar_pixel(rx + rdw / 3, sh * 3 / 4,     CC);
+            gbt_dibujar_pixel(rx + rdw / 3, sh * 3 / 4 + 1, CC);
+        }
+        // Guión horizontal
+        for (uint16_t i = 0; i < 4; i++)
+            if (rx + rdw * 2 / 3 + i < sw) gbt_dibujar_pixel(rx + rdw * 2 / 3 + i, sh * 3 / 5, A);
+    }
+}
+
 ///Funciones dibujar
 void fondoDibujar(tTablero* tablero, tConfigPantalla* config)
 {
@@ -170,7 +284,7 @@ void piezaActualDibujar(tTetromino* tetro, tConfigPantalla* config)
 }
 
 ///Funciones logica
-void tableroActualizarEstado(tTablero* t, bool* game_over)
+void tableroActualizarEstado(tTablero* t,tConfigPantalla* config, tEstadoJuego* estado, bool* game_over)
 {
     if(!t || !t->pieza_actual)
     {
@@ -181,7 +295,7 @@ void tableroActualizarEstado(tTablero* t, bool* game_over)
            t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
 //=======================================================
     t->pieza_actual->y++;
-    if(posicionValida(t->pieza_actual, t))
+    if(posicionValida(t->pieza_actual, t, config))
     {
 //=======================================================
         printf("    Posicion valida, continua bajando\n");
@@ -192,22 +306,27 @@ void tableroActualizarEstado(tTablero* t, bool* game_over)
     printf("    Posicion INVALIDA, ancla\n");
 //=======================================================
     t->pieza_actual->y--;
-    piezaAnclar(t->pieza_actual, t);
+    piezaAnclar(t->pieza_actual, t, config);
 //=======================================================
     printf("    Pieza anclada en y=%d\n", t->pieza_actual->y);
 //=======================================================
-    lineasLimpiar(t);
+    if (t->pieza_actual->tipo != TETROMINO_NULO)
+        estado->conteo_piezas[(int)t->pieza_actual->tipo]++;
+    int limpias = lineasLimpiar(t, config, estado);
+    static const int puntos_por_lineas[5] = {0, 100, 300, 500, 800};
+    if (limpias >= 1 && limpias <= 4)
+        estado->puntos += puntos_por_lineas[limpias];
     tetrominoCopiar(t->pieza_actual, t->pieza_siguiente);
 //=======================================================
     printf("    Nueva pieza actual (era siguiente): tipo=%d, x=%d, y=%d\n",
            t->pieza_actual->tipo, t->pieza_actual->x, t->pieza_actual->y);
 //=======================================================
-    tetrominoAleatorio(t->pieza_siguiente, t->columnas);
+    tetrominoAleatorio(t->pieza_siguiente, config->columnas);
 //=======================================================
     printf("    Nueva pieza siguiente generada: tipo=%d, x=%d\n",
            t->pieza_siguiente->tipo, t->pieza_siguiente->x);
 //=======================================================
-    if(!posicionValida(t->pieza_actual, t))
+    if(!posicionValida(t->pieza_actual, t, config))
     {
 //=======================================================
         printf("    ERROR: Nueva pieza actual NO es valida! GAME OVER\n");
@@ -219,7 +338,7 @@ void tableroActualizarEstado(tTablero* t, bool* game_over)
     printf("    Nueva pieza actual es valida\n\n");
 //=======================================================
 }
-bool posicionValida(tTetromino* tetro, tTablero* t)
+bool posicionValida(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
     if(!tetro || !t)
     {
@@ -235,8 +354,8 @@ bool posicionValida(tTetromino* tetro, tTablero* t)
                 x_tablero = tetro->x + j;
                 y_tablero = tetro->y + i;
                 // Validacion limites
-                if(x_tablero < 0 || x_tablero >= t->columnas ||
-                        y_tablero < 0 || y_tablero >= t->filas)
+                if(x_tablero < 0 || x_tablero >= config->columnas ||
+                        y_tablero < 0 || y_tablero >= config->filas)
                 {
                     return false;
                 }
@@ -251,40 +370,40 @@ bool posicionValida(tTetromino* tetro, tTablero* t)
     return true;
 }
 ///Funciones validantes
-bool puedeBajar(tTetromino* tetro, tTablero* t)
+bool puedeBajar(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
     if(!tetro || !t)
     {
         return false;
     }
     tetro->y++;
-    bool valido = posicionValida(tetro, t);
+    bool valido = posicionValida(tetro, t, config);
     tetro->y--;
     return valido;
 }
-bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t)
+bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
     if(!tetro || !t)
     {
         return false;
     }
     tetro->x--;
-    bool valido = posicionValida(tetro, t);
+    bool valido = posicionValida(tetro, t, config);
     tetro->x++;
     return valido;
 }
-bool puedeMoverDerecha(tTetromino* tetro, tTablero* t)
+bool puedeMoverDerecha(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
     if(!tetro || !t)
     {
         return false;
     }
     tetro->x++;
-    bool valido = posicionValida(tetro, t);
+    bool valido = posicionValida(tetro, t, config);
     tetro->x--;
     return valido;
 }
-static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTablero* t)
+static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTablero* t, tConfigPantalla* config)
 {
 
     if(!matriz || !t)
@@ -302,8 +421,8 @@ static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTabler
                 x_tab = x + j;
                 y_tab = y + i;
 
-                if(x_tab < 0 || x_tab >= t->columnas ||
-                        y_tab < 0 || y_tab >= t->filas)
+                if(x_tab < 0 || x_tab >= config->columnas ||
+                        y_tab < 0 || y_tab >= config->filas)
                 {
                     return false;
                 }
@@ -316,7 +435,7 @@ static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTabler
     }
     return true;
 }
-bool puedeRotar(tTetromino* tetro, tTablero* t, bool sentido_derecha)
+bool puedeRotar(tTetromino* tetro, tTablero* t, tConfigPantalla* config, bool sentido_derecha)
 {
     if(!tetro || !t)
     {
@@ -336,10 +455,10 @@ bool puedeRotar(tTetromino* tetro, tTablero* t, bool sentido_derecha)
     {
         return false;
     }
-    return validarMatrizEnPosicion(tetro->x, tetro->y, nueva_matriz, t);
+    return validarMatrizEnPosicion(tetro->x, tetro->y, nueva_matriz, t, config);
 }
 
-void piezaAnclar(tTetromino* tetro, tTablero* t)
+void piezaAnclar(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
     uint8_t i,j,x,y;
     for(i = 0; i < 4; i++)
@@ -350,7 +469,7 @@ void piezaAnclar(tTetromino* tetro, tTablero* t)
             {
                 x = tetro->x + j;
                 y = tetro->y + i;
-                if(x >= t->columnas || y >= t->filas)
+                if(x >= config->columnas || y >= config->filas)
                 {
                     return; //Si el bloque no cabe, cancelamos anclaje
                 }
@@ -370,18 +489,19 @@ void piezaAnclar(tTetromino* tetro, tTablero* t)
         }
     }
 }
-void lineasLimpiar(tTablero* t)
+int lineasLimpiar(tTablero* t, tConfigPantalla* config, tEstadoJuego* estado)
 {
     if(!t)
     {
-        return;
+        return 0;
     }
+    int limpias = 0;
     bool llena;
-    for(int y = 0; y < t->filas; y++)
+    for(int y = 0; y < config->filas; y++)
     {
         llena = true;
         // verificar fila completa
-        for(int x = 0; x < t->columnas; x++)
+        for(int x = 0; x < config->columnas; x++)
         {
             if(t->tablero[y][x] == 0)
             {
@@ -401,9 +521,11 @@ void lineasLimpiar(tTablero* t)
             // reutilizar la fila eliminada arriba
             t->tablero[0] = filaEliminada;
             // vaciar contenido
-            memset(t->tablero[0], 0, t->columnas * sizeof(unsigned char));
-            t->lineas_limpias++;
+            memset(t->tablero[0], 0, config->columnas * sizeof(unsigned char));
+            estado->lineas_limpias++;
+            limpias++;
             y--;
         }
     }
+    return limpias;
 }

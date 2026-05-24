@@ -3,6 +3,7 @@
 
 #include "paleta.h"
 #include "config.h"
+#include "piezas.h"
 
 #define ALTO_NUMERO 7
 #define ANCHO_NUMERO 5
@@ -11,11 +12,11 @@
 
 // Matrices de letras A-Z (5x3 píxeles)
 static const uint8_t letra_A[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, 0},
-    {CC, 0, CC},
     {CC, CC, CC},
-    {CC, 0, CC},
-    {CC, 0, CC}
+    {CC,  0, CC},
+    {CC, CC, CC},
+    {CC,  0, CC},
+    {CC,  0, CC}
 };
 
 static const uint8_t letra_B[ALTO_LETRA][ANCHO_LETRA] = {
@@ -27,11 +28,11 @@ static const uint8_t letra_B[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_C[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, CC},
-    {CC, 0, 0},
-    {CC, 0, 0},
-    {CC, 0, 0},
-    {0, CC, CC}
+    {CC, CC, CC},
+    {CC,  0,  0},
+    {CC,  0,  0},
+    {CC,  0,  0},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_D[ALTO_LETRA][ANCHO_LETRA] = {
@@ -59,11 +60,11 @@ static const uint8_t letra_F[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_G[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, CC},
-    {CC, 0, 0},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {0, CC, CC}
+    {CC, CC, CC},
+    {CC,  0,  0},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_H[ALTO_LETRA][ANCHO_LETRA] = {
@@ -83,11 +84,11 @@ static const uint8_t letra_I[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_J[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, CC},
-    {0, 0, CC},
-    {0, 0, CC},
-    {CC, 0, CC},
-    {0, CC, 0}
+    { 0, CC, CC},
+    { 0,  0, CC},
+    { 0,  0, CC},
+    { 0,  0, CC},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_K[ALTO_LETRA][ANCHO_LETRA] = {
@@ -123,11 +124,11 @@ static const uint8_t letra_N[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_O[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, 0},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {0, CC, 0}
+    {CC, CC, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_P[ALTO_LETRA][ANCHO_LETRA] = {
@@ -139,11 +140,11 @@ static const uint8_t letra_P[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_Q[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, 0},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {0, CC, CC}
+    {CC, CC, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC, CC,  0}
 };
 
 static const uint8_t letra_R[ALTO_LETRA][ANCHO_LETRA] = {
@@ -155,11 +156,11 @@ static const uint8_t letra_R[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_S[ALTO_LETRA][ANCHO_LETRA] = {
-    {0, CC, CC},
-    {CC, 0, 0},
-    {0, CC, 0},
-    {0, 0, CC},
-    {CC, CC, 0}
+    {CC, CC, CC},
+    {CC,  0,  0},
+    {CC, CC, CC},
+    { 0,  0, CC},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_T[ALTO_LETRA][ANCHO_LETRA] = {
@@ -171,11 +172,11 @@ static const uint8_t letra_T[ALTO_LETRA][ANCHO_LETRA] = {
 };
 
 static const uint8_t letra_U[ALTO_LETRA][ANCHO_LETRA] = {
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {CC, 0, CC},
-    {0, CC, 0}
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC,  0, CC},
+    {CC, CC, CC}
 };
 
 static const uint8_t letra_V[ALTO_LETRA][ANCHO_LETRA] = {
@@ -226,19 +227,19 @@ static const uint8_t cero[ALTO_NUMERO][ANCHO_NUMERO] = {
       {CC, 0, 0, 0, CC},
       {CC, 0, 0, 0, CC},
       {0, CC, CC, CC, 0}
-  };
+};
 
-  static const uint8_t uno[ALTO_NUMERO][ANCHO_NUMERO] = {
-      {0, 0, CC, 0, 0},
-      {0, CC, CC, 0, 0},
-      {0, 0, CC, 0, 0},
-      {0, 0, CC, 0, 0},
-      {0, 0, CC, 0, 0},
-      {0, 0, CC, 0, 0},
-      {0, CC, CC, CC, 0}
-  };
+static const uint8_t uno[ALTO_NUMERO][ANCHO_NUMERO] = {
+      { 0, CC, CC,  0,  0},
+      {CC,  0, CC,  0,  0},
+      { 0,  0, CC,  0,  0},
+      { 0,  0, CC,  0,  0},
+      { 0,  0, CC,  0,  0},
+      { 0,  0, CC,  0,  0},
+      {CC, CC, CC, CC, CC}
+};
 
-  static const uint8_t dos[ALTO_NUMERO][ANCHO_NUMERO] = {
+static const uint8_t dos[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, CC, CC, CC, 0},
       {CC, 0, 0, 0, CC},
       {0, 0, 0, 0, CC},
@@ -246,7 +247,7 @@ static const uint8_t cero[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, CC, 0, 0, 0},
       {CC, 0, 0, 0, 0},
       {CC, CC, CC, CC, CC}
-  };
+};
 
 static const uint8_t tres[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, CC, CC, CC, 0},
@@ -256,7 +257,7 @@ static const uint8_t tres[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, 0, 0, 0, CC},
       {CC, 0, 0, 0, CC},
       {0, CC, CC, CC, 0}
-  };
+};
 
 static const uint8_t cuatro[ALTO_NUMERO][ANCHO_NUMERO] = {
       {CC,  0,  0,  0, CC},
@@ -266,7 +267,7 @@ static const uint8_t cuatro[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0,   0,  0,  0, CC},
       {0,   0,  0,  0, CC},
       {0,   0,  0,  0, CC}
-  };
+};
 
 static const uint8_t cinco[ALTO_NUMERO][ANCHO_NUMERO] = {
       {CC, CC, CC, CC, CC},
@@ -276,7 +277,7 @@ static const uint8_t cinco[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, 0, 0, 0, CC},
       {CC, 0, 0, 0, CC},
       {0, CC, CC, CC, 0}
-  };
+};
 
 static const uint8_t seis[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, CC, CC, CC, 0},
@@ -286,7 +287,7 @@ static const uint8_t seis[ALTO_NUMERO][ANCHO_NUMERO] = {
       {CC, 0, 0, 0, CC},
       {CC, 0, 0, 0, CC},
       {0, CC, CC, CC, 0}
-  };
+};
 
 static const uint8_t siete[ALTO_NUMERO][ANCHO_NUMERO] = {
       {CC, CC, CC, CC, CC},
@@ -296,17 +297,17 @@ static const uint8_t siete[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, 0, CC, 0, 0},
       {0, CC, 0, 0, 0},
       {CC, 0, 0, 0, 0}
-  };
+};
 
 static const uint8_t ocho[ALTO_NUMERO][ANCHO_NUMERO] = {
-      {0, CC, CC, CC, 0},
-      {CC, 0, 0, 0, CC},
-      {CC, 0, 0, 0, CC},
-      {0, CC, CC, CC, 0},
-      {CC, 0, 0, 0, CC},
-      {CC, 0, 0, 0, CC},
-      {0, CC, CC, CC, 0}
-  };
+      { 0, CC, CC, CC,  0},
+      {CC,  0,  0,  0, CC},
+      {CC,  0,  0,  0, CC},
+      {CC, CC, CC, CC, CC},
+      {CC,  0,  0,  0, CC},
+      {CC,  0,  0,  0, CC},
+      { 0, CC, CC, CC,  0}
+};
 
 static const uint8_t nueve[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, CC, CC, CC, 0},
@@ -316,7 +317,7 @@ static const uint8_t nueve[ALTO_NUMERO][ANCHO_NUMERO] = {
       {0, 0, 0, 0, CC},
       {0, 0, 0, 0, CC},
       {0, CC, CC, CC, 0}
-  };
+};
 
 void disposicionHudCalcular(tConfigPantalla* config);
 void hudRecuadrosDibujar(tConfigPantalla* config);
@@ -327,9 +328,12 @@ void hudScoreDibujar(uint32_t score, uint8_t escala, tConfigPantalla* config);
 void hudNivelDibujar(uint8_t nivel, uint8_t escala, tConfigPantalla* config);
 void hudLineasDibujar(uint16_t lineas, uint8_t escala, tConfigPantalla* config);
 void hudTiempoDibujar(uint16_t tiempo_segundos, uint8_t escala, tConfigPantalla* config);
-void hudNextDibujar(tConfigPantalla* config);
-void hudScoreConEtiquetaDibujar(uint32_t score, uint8_t escala, tConfigPantalla* config);
-void hudNivelConEtiquetaDibujar(uint8_t nivel, uint8_t escala, tConfigPantalla* config);
-void hudLineasConEtiquetaDibujar(uint16_t lineas, uint8_t escala, tConfigPantalla* config);
+void hudNextDibujar(tTetromino* siguiente, tConfigPantalla* config);
+void hudPiezasDibujar(uint16_t conteo[7], tConfigPantalla* config);
+void hudScoreConEtiquetaDibujar(uint32_t* score, uint8_t escala, tConfigPantalla* config);
+void hudNivelConEtiquetaDibujar(uint8_t* nivel, uint8_t escala, tConfigPantalla* config);
+void hudLineasConEtiquetaDibujar(uint16_t* lineas, uint8_t escala, tConfigPantalla* config);
+void hudTiempoConEtiquetaDibujar(uint16_t tiempo_segundos, uint8_t escala, tConfigPantalla* config);
+void hudTituloNeonDibujar(tConfigPantalla* config);
 
 #endif // HUD_H_INCLUDED

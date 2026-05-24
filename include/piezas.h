@@ -209,7 +209,7 @@ static const uint8_t tetromino_Z_rotaciones[4][4][4] = {
 
 
 tTetromino* tetrominoCrear();
-void tetrominoAleatorio(tTetromino* t, char col);
+void tetrominoAleatorio(tTetromino* t, uint8_t col);
 void tetrominoCopiar(tTetromino* destino, tTetromino* origen);
 void tetrominoRotar(tTetromino* tetro, bool sentido_derecha);
 void tetrominoBajar(tTetromino* tetro);

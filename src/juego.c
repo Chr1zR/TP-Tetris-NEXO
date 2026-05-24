@@ -13,13 +13,13 @@ int iniciar_juego(int argc, char* argv[]){
 
 //====================================================================
     ///Configuracion inicial modalidad juego
-    tConfigPantalla* config;
+    tConfigPantalla* config = NULL;
 
     if(argc == 1){
         //Si no detecta argumentos pasados ejecutamos config_default -> VGA con escala=1
         config = crear_config_default();
     }
-    if(argc == 3){
+    else if(argc == 3){
 
         config = crear_config(argv);
     }
@@ -58,15 +58,27 @@ int iniciar_juego(int argc, char* argv[]){
 
     tTablero* tablero = crear_tablero(config);
     if(!tablero){
+        parar_plataforma(temporizador,temporizador_seg);
+        configDestruir(config);
+        config = NULL;
+        return ERROR_INICIALIZACION;
+    }
+
+    tEstadoJuego* estado = tEstadoCrear();
+    if(!estado){
+        tTetromino_Destruir(tablero->pieza_actual);
+        tTetromino_Destruir(tablero->pieza_siguiente);
+        vaciar_tablero(tablero, config);
         tablero = NULL;
         parar_plataforma(temporizador,temporizador_seg);
         configDestruir(config);
         config = NULL;
         return ERROR_INICIALIZACION;
     }
+    estado->nivel = 1;
     srand(time(0));
-    tetrominoAleatorio(tablero->pieza_actual, tablero->columnas);
-    tetrominoAleatorio(tablero ->pieza_siguiente, tablero->columnas);
+    tetrominoAleatorio(tablero->pieza_actual, config->columnas);
+    tetrominoAleatorio(tablero ->pieza_siguiente, config->columnas);
     uint8_t corriendo = 1;
     bool game_over = false;
     eGBT_Tecla tecla;
@@ -74,10 +86,7 @@ int iniciar_juego(int argc, char* argv[]){
     static uint16_t seg_transcurrido = 0;
 
 ///          ---Contadores de juego---
-      uint32_t score = 0;
-      uint8_t nivel = 1;
-      uint16_t lineas_totales = 0;
-      char nombre_jugador[20] = "JUGADOR1";  // Placeholder
+      char nombre_jugador[20] = "JUGADOR1";
 
 //=============================================
 /// DEBUGGING
@@ -109,14 +118,14 @@ int iniciar_juego(int argc, char* argv[]){
             printf("Saliendo del ejemplo\n");
         }
         if(tecla == GBTK_DERECHA){
-            if(puedeMoverDerecha(tablero->pieza_actual,tablero)){
+            if(puedeMoverDerecha(tablero->pieza_actual,tablero, config)){
 
                 tablero->pieza_actual->x++;
             }
         }
         if(tecla == GBTK_IZQUIERDA){
 
-            if(puedeMoverIzquierda(tablero->pieza_actual,tablero)){
+            if(puedeMoverIzquierda(tablero->pieza_actual,tablero, config)){
 
                 tablero->pieza_actual->x--;
             }
@@ -125,10 +134,10 @@ int iniciar_juego(int argc, char* argv[]){
 
 //================================================================
         printf("DEBUG: Tecla ARRIBA presionada\n");
-        printf("DEBUG: puedeRotar = %d\n", puedeRotar(tablero->pieza_actual, tablero, true));
+        printf("DEBUG: puedeRotar = %d\n", puedeRotar(tablero->pieza_actual, tablero, config, true));
         fflush(stdout);
 //================================================================
-            if(puedeRotar(tablero->pieza_actual, tablero, true)){
+            if(puedeRotar(tablero->pieza_actual, tablero, config, true)){
 
 //================================================================
                 printf("DEBUG: Llamando tetrominoRotar\n");
@@ -141,7 +150,7 @@ int iniciar_juego(int argc, char* argv[]){
             }
         }
 
-        if(gbt_tecla_sostenida(GBTK_ABAJO) && puedeBajar(tablero->pieza_actual, tablero)){
+        if(gbt_tecla_sostenida(GBTK_ABAJO) && puedeBajar(tablero->pieza_actual, tablero, config)){
 
             tetrominoBajar(tablero->pieza_actual);
             piezaActualDibujar(tablero->pieza_actual, config);
@@ -150,14 +159,16 @@ int iniciar_juego(int argc, char* argv[]){
 ///                             REDIBUJADO PANTALLA
 //    ==================================================================
         gbt_borrar_backbuffer(N);
-
+        fondoTronDibujar(config);
         hudRecuadrosDibujar(config);
+        hudTituloNeonDibujar(config);
 
 ///                 Dibujar HUD con etiquetas y contenido
-          hudNextDibujar(config);
-          hudScoreConEtiquetaDibujar(score, 2, config);
-          hudNivelConEtiquetaDibujar(nivel, 2, config);
-          hudLineasConEtiquetaDibujar(lineas_totales, 2, config);
+          hudNextDibujar(tablero->pieza_siguiente, config);
+          hudPiezasDibujar(estado->conteo_piezas, config);
+          hudScoreConEtiquetaDibujar(&(estado->puntos), 2, config);
+          hudNivelConEtiquetaDibujar(&(estado->nivel), 3, config);
+          hudLineasConEtiquetaDibujar(&(estado->lineas_limpias), 2, config);
 
 ///                  Dibujar nombre (recuadro NOMBRE al final)
           uint16_t x_nombre = config->hud.nombre.offset_x_inicial + 5;
@@ -165,9 +176,6 @@ int iniciar_juego(int argc, char* argv[]){
           hudPalabraDibujar(nombre_jugador, x_nombre, y_nombre, CC, 3, config);
 
           fondoDibujar(tablero, config);
-
-
-        fondoDibujar(tablero, config);
         piezasAncladasDibujar(tablero, config);
 
 //    ==================================================================
@@ -182,7 +190,7 @@ int iniciar_juego(int argc, char* argv[]){
 //                 tablero->pieza_actual->y,
 //                 tablero->pieza_actual->tipo);
 //=========================================================
-            tableroActualizarEstado(tablero, &game_over);
+            tableroActualizarEstado(tablero, config, estado, &game_over);
         }
 ///             --- TEMPORIZADOR SEGUNDOS TRANSCURRIDOS ---
         if(gbt_temporizador_consumir(temporizador_seg)){
@@ -192,7 +200,7 @@ int iniciar_juego(int argc, char* argv[]){
             printf("GAME OVER!. Saliendo...\n");
             corriendo = 0;
         }
-        hudTiempoDibujar(seg_transcurrido, 2, config);
+        hudTiempoConEtiquetaDibujar(seg_transcurrido, 2, config);
         piezaActualDibujar(tablero->pieza_actual, config);
 
         gbt_volcar_backbuffer();
@@ -204,9 +212,10 @@ int iniciar_juego(int argc, char* argv[]){
 //====================================================================================
 //    printf("Total frames: %d, Actualizaciones: %d\n", frame, actualizaciones);
 //====================================================================================
+    tEstadoDestruir(estado);
     tTetromino_Destruir(tablero->pieza_actual);
     tTetromino_Destruir(tablero->pieza_siguiente);
-    vaciar_tablero(tablero);
+    vaciar_tablero(tablero, config);
     tablero = NULL;
     parar_plataforma(temporizador, temporizador_seg);
     configDestruir(config);

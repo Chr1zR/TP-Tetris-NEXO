@@ -42,7 +42,7 @@ const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotac
             return NULL;
     }
 }
-void tetrominoAleatorio(tTetromino* tetromino, char col){
+void tetrominoAleatorio(tTetromino* tetromino, uint8_t col){
 
     if(!tetromino){
         return;

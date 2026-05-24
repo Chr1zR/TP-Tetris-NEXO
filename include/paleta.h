@@ -3,7 +3,7 @@
 
 #include<GBT/gbt.h>
 
-#define CANT_COLORES 14
+#define CANT_COLORES 15
 
 #define N 0     //Negro
 #define A 1     //Azul
@@ -18,7 +18,8 @@
 #define CC 10   //Celeste claro
 #define CO 11   //Celeste oscuro
 #define AO 12   //Azul oscuro
-#define T 13    //Transparente
+#define GA 13   //Gris acero (azul-gris oscuro, fondo ladrillado)
+#define T 14    //Transparente
 
 extern tGBT_ColorRGB paletaCGA[CANT_COLORES];
 
