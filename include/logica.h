@@ -3,6 +3,8 @@
 
 #include "piezas.h"
 #include <stdbool.h>
+
+typedef struct sJuego tJuego;
 typedef struct{
     unsigned char **tablero;
     tTetromino* pieza_actual;
@@ -14,12 +16,14 @@ typedef struct{
     uint32_t puntos;
     uint16_t lineas_limpias;
     uint16_t conteo_piezas[7];
+    uint16_t piezas_totales;
     uint8_t nivel;
 }tEstadoJuego;
 
 ///Funciones tTablero
 tTablero* crear_tablero(tConfigPantalla* config);
 void vaciar_tablero(tTablero* tablero, tConfigPantalla* config);
+void tableroReiniciar(tTablero* tablero, tConfigPantalla* config);
 
 ///Funciones tEstadoJuego
 tEstadoJuego* tEstadoCrear();
@@ -27,14 +31,13 @@ void tEstadoDestruir(tEstadoJuego* estado);
 
 
 ///Funciones dibujar
-void fondoTronDibujar(tConfigPantalla* config);
-void fondoDibujar(tTablero* tablero, tConfigPantalla* config);
-void bloqueDibujar(uint16_t x_pantalla, uint16_t y_pantalla, uint8_t color, tConfigPantalla* config);
+void fondoHudDibujar(tConfigPantalla* config);
+void cuadriculaDibujar(tTablero* tablero, tConfigPantalla* config);
 void piezasAncladasDibujar(tTablero* t, tConfigPantalla* config);
 void piezaActualDibujar(tTetromino* tetro, tConfigPantalla* config);
 
 ///Funciones logica
-void tableroActualizarEstado(tTablero* tablero, tConfigPantalla* config, tEstadoJuego* estado, bool* game_over);
+void tableroActualizarEstado(tTablero* tablero, tConfigPantalla* config, tJuego* juego);
 bool posicionValida(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
 
 bool puedeBajar(tTetromino* tetro, tTablero* t, tConfigPantalla* config);

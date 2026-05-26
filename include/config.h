@@ -47,28 +47,10 @@ typedef struct {
 } tHUD;
 
 typedef struct {
-    //Ventana fisica
-    uint16_t ancho_ventana; //CGA = 320x200
-    uint16_t alto_ventana;  //VGA = 640x480(default)
-    uint8_t escala;
 
-    //Variables a calcular
-    uint16_t ancho_tablero;
-    uint16_t alto_tablero;
-    uint16_t tam_bloque;
-    uint16_t ancho_hud_izq;
-    uint16_t ancho_hud_der;
-    uint16_t offset_tablero_x;
-    uint16_t offset_tablero_y;
-
-    uint8_t columnas;
-    uint8_t filas;
-
-    tDisposicionHud hud;
-
-    //tVentana ventana;
-    //tDisposicionTablero tablero;
-    //tHUD hud;
+    tVentana ventana;
+    tDisposicionTablero tablero;
+    tHUD hud;
 }tConfigPantalla;
 
 

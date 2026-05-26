@@ -5,36 +5,25 @@
 #include <string.h>
 #include <stdio.h>
 
-// static void tConfigInicializar(tConfigPantalla* config)
-// {
-//     config->filas = 20;
-//     config->tam_bloque = (config->alto_ventana - 6) / config->filas;
-//     config->alto_tablero = config->filas * config->tam_bloque;
-
-//     uint8_t modal = modalidadObtener();
-//     if (modal == 2) {
-//         config->columnas = columnasDeluxeObtener();
-//     } else {
-//         config->columnas = 10;
-//     }
-// }
-
 tConfigPantalla* crear_config_default(){
 
     tConfigPantalla* config = calloc(1,sizeof(tConfigPantalla));
     if(!config){
         return NULL;
     }
-    config->ancho_ventana = 640;
-    config->alto_ventana = 480;
-    config->escala = 1;
 
-    config->filas = 20;
-    config->columnas = 10;      //Columnas en modalidad deluxe tienen rango [8;16]
+    config->ventana.ancho = 640;
+    config->ventana.alto = 480;
+    config->ventana.escala = 1;
 
-    config->tam_bloque = (config->alto_ventana - 6) / config->filas;
-    config->alto_tablero = config->filas * config->tam_bloque;
+    config->tablero.filas = 20;  
 
+    config->tablero.columnas = 10;   //Columnas en modalidad deluxe tienen rango [8;16]
+
+    config->tablero.tam_bloque = (config->ventana.alto - 6) / config->tablero.filas;
+    config->tablero.alto_px = config->tablero.filas * config->tablero.tam_bloque;
+
+    
     anchosCalcular(config);
 
     return config;
@@ -53,21 +42,21 @@ tConfigPantalla* crear_config(char* argv[]){
 
     if(strcmp(argv[1],"VGA") == 0){
 
-    config->ancho_ventana = 640;
-    config->alto_ventana = 480;
-    config->escala = atoi(argv[2]);
+    config->ventana.ancho = 640;
+    config->ventana.alto = 480;
+    config->ventana.escala = atoi(argv[2]);
 
-    config->filas = 20;
+    config->tablero.filas = 20;
 
     modal = modalidadObtener();
     if(modal == 2){
-        config->columnas = columnasDeluxeObtener();
+        config->tablero.columnas = columnasDeluxeObtener();
     }
     else{
-        config->columnas = 10;
+        config->tablero.columnas = 10;
     }
-    config->tam_bloque = (config->alto_ventana - 6) / config->filas;
-    config->alto_tablero = config->filas * config->tam_bloque;
+    config->tablero.tam_bloque = (config->ventana.alto - 6) / config->tablero.filas;
+    config->tablero.alto_px = config->tablero.filas * config->tablero.tam_bloque;
 
     anchosCalcular(config);
 
@@ -75,21 +64,23 @@ tConfigPantalla* crear_config(char* argv[]){
     }
     if(strcmp(argv[1],"CGA") == 0){
 
-    config->ancho_ventana = 320;
-    config->alto_ventana = 200;
-    config->escala = atoi(argv[2]);
 
-    config->filas = 20;
+    config->ventana.ancho = 320;
+    config->ventana.alto = 200;
+    config->ventana.escala = atoi(argv[2]);
+
+    config->tablero.filas = 20;
+
 
     modal = modalidadObtener();
     if(modal == 2){
-        config->columnas = columnasDeluxeObtener();
+        config->tablero.columnas = columnasDeluxeObtener();
     }
     else{
-        config->columnas = 10;
+        config->tablero.columnas = 10;
     }
-    config->tam_bloque = (config->alto_ventana - 6) / config->filas;
-    config->alto_tablero = config->filas * config->tam_bloque;
+    config->tablero.tam_bloque = (config->ventana.alto - 6) / config->tablero.filas;
+    config->tablero.alto_px = config->tablero.filas * config->tablero.tam_bloque;
 
     anchosCalcular(config);
 
@@ -110,17 +101,17 @@ void anchosCalcular(tConfigPantalla* config){
         return;
     }
     // Calcula ancho_tablero basado en columnas
-    config->ancho_tablero = config->columnas * config->tam_bloque;
+    config->tablero.ancho_px = config->tablero.columnas * config->tablero.tam_bloque;
 
     // Centra tablero horizontalmente
-    config->offset_tablero_x = (config->ancho_ventana - config->ancho_tablero) / 2;
+    config->tablero.offset_x = (config->ventana.ancho - config->tablero.ancho_px) / 2;
 
     // Centra tablero verticalmente
-    config->offset_tablero_y = (config->alto_ventana - config->alto_tablero) / 2;
+    config->tablero.offset_y = (config->ventana.alto - config->tablero.alto_px) / 2;
 
     // Distribuye espacio a los costados
-    config->ancho_hud_izq = config->offset_tablero_x;
-    config->ancho_hud_der = config->ancho_ventana - config->offset_tablero_x - config->ancho_tablero;
+    config->hud.ancho_izq = config->tablero.offset_x;
+    config->hud.ancho_der = config->ventana.ancho - config->tablero.offset_x - config->tablero.ancho_px;
 
     disposicionHudCalcular(config);
 }

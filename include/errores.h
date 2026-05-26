@@ -7,6 +7,4 @@ typedef enum{
     ERROR_CREAR_TETROMINO = 0
 }ErrorCodigo;
 
-//const char* error_a_texto(ErrorCodigo error);
-
 #endif // ERRORES_H_INCLUDED

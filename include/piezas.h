@@ -22,6 +22,7 @@ typedef struct{
     uint8_t matriz[4][4];
     uint8_t rotacion;
     uint16_t x,y;
+    uint8_t min_fila, max_fila, min_col, max_col;
 }tTetromino;
 
 static const uint8_t tetromino_I_rotaciones[4][4][4] = {
@@ -215,4 +216,5 @@ void tetrominoRotar(tTetromino* tetro, bool sentido_derecha);
 void tetrominoBajar(tTetromino* tetro);
 const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotacion);
 void tTetromino_Destruir(tTetromino* t);
+void tetrominoCalcularLimites(tTetromino* t);
 #endif // PIEZAS_H_INCLUDED

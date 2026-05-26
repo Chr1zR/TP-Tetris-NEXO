@@ -13,9 +13,9 @@ int iniciar_plataforma(char* nombreVentana, size_t tam, tConfigPantalla* config)
         return ERROR_INICIALIZACION;
     }
 
-    snprintf(nombreVentana, tam, "Ventana %dx%d",config->ancho_ventana, config->alto_ventana);
+    snprintf(nombreVentana, tam, "Ventana %dx%d",config->ventana.ancho, config->ventana.alto);
 
-    if (gbt_crear_ventana(nombreVentana, config->ancho_ventana, config->alto_ventana, config->escala) != 0) {
+    if (gbt_crear_ventana(nombreVentana, config->ventana.ancho, config->ventana.alto, config->ventana.escala) != 0) {
         fprintf(stderr, "Error al iniciar el modulo de graficos de GBT: %s\n", gbt_obtener_log());
         gbt_cerrar();
         return ERROR_INICIALIZACION;

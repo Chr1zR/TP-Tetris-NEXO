@@ -58,6 +58,7 @@ void tetrominoAleatorio(tTetromino* tetromino, uint8_t col){
 
     tetromino ->x = rand() % (col -3);
     tetromino ->y = 0;
+    tetrominoCalcularLimites(tetromino);
 }
 void tetrominoBajar(tTetromino* t){
 
@@ -72,6 +73,10 @@ void tetrominoCopiar(tTetromino* destino, tTetromino* origen){
     destino->x = origen->x;
     destino->y = origen->y ;
     destino->rotacion = origen->rotacion;
+    destino->min_fila = origen->min_fila;
+    destino->max_fila = origen->max_fila;
+    destino->min_col = origen->min_col;
+    destino->max_col = origen->max_col;
 
     memcpy(destino->matriz, origen->matriz, sizeof(origen->matriz));
 }
@@ -92,6 +97,7 @@ void tetrominoRotar(tTetromino* tetro, bool sentido_derecha){
     if(nueva_matriz){
         memcpy(tetro->matriz, nueva_matriz, 16);
         tetro->rotacion = nueva_rotacion;
+        tetrominoCalcularLimites(tetro);
     }
 }
 void tTetromino_Destruir(tTetromino* t){
@@ -105,4 +111,20 @@ void tTetromino_Destruir(tTetromino* t){
     memset(t->matriz, 0, sizeof(t->matriz));
     free(t);
     t = NULL;
+}
+
+void tetrominoCalcularLimites(tTetromino* t){
+    if(!t) return;
+    t->min_fila = 4; t->max_fila = 0;
+    t->min_col = 4; t->max_col = 0;
+    for(uint8_t i = 0; i < 4; i++){
+        for(uint8_t j = 0; j < 4; j++){
+            if(t->matriz[i][j]){
+                if(i < t->min_fila) t->min_fila = i;
+                if(i > t->max_fila) t->max_fila = i;
+                if(j < t->min_col) t->min_col = j;
+                if(j > t->max_col) t->max_col = j;
+            }
+        }
+    }
 }

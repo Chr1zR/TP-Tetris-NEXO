@@ -320,20 +320,18 @@ static const uint8_t nueve[ALTO_NUMERO][ANCHO_NUMERO] = {
 };
 
 void disposicionHudCalcular(tConfigPantalla* config);
+
 void hudRecuadrosDibujar(tConfigPantalla* config);
-void hudLetraDibujar(const uint8_t (*letra)[ANCHO_LETRA], uint16_t x, uint16_t y, uint8_t color, uint8_t escala, tConfigPantalla* config);
-void hudPalabraDibujar(const char* palabra, uint16_t x, uint16_t y, uint8_t color, uint8_t escala, tConfigPantalla* config);
-void hudNumeroDibujar(uint16_t x, uint16_t y, uint8_t numero, uint8_t color, uint8_t escala, tConfigPantalla* config);
+void hudPalabraDibujar(const char* palabra, uint16_t pos_x, uint16_t pos_y, uint8_t color, uint8_t escala, tConfigPantalla* config);
 void hudScoreDibujar(uint32_t score, uint8_t escala, tConfigPantalla* config);
 void hudNivelDibujar(uint8_t nivel, uint8_t escala, tConfigPantalla* config);
 void hudLineasDibujar(uint16_t lineas, uint8_t escala, tConfigPantalla* config);
 void hudTiempoDibujar(uint16_t tiempo_segundos, uint8_t escala, tConfigPantalla* config);
 void hudNextDibujar(tTetromino* siguiente, tConfigPantalla* config);
 void hudPiezasDibujar(uint16_t conteo[7], tConfigPantalla* config);
-void hudScoreConEtiquetaDibujar(uint32_t* score, uint8_t escala, tConfigPantalla* config);
-void hudNivelConEtiquetaDibujar(uint8_t* nivel, uint8_t escala, tConfigPantalla* config);
-void hudLineasConEtiquetaDibujar(uint16_t* lineas, uint8_t escala, tConfigPantalla* config);
-void hudTiempoConEtiquetaDibujar(uint16_t tiempo_segundos, uint8_t escala, tConfigPantalla* config);
 void hudTituloNeonDibujar(tConfigPantalla* config);
+void cubrirPausaDibujar(tConfigPantalla* config, uint8_t opcion_seleccionada);
+void cubrirGameOverDibujar(tConfigPantalla* config, uint32_t score, uint16_t lineas, const char* nombre, uint8_t opcion_seleccionada);
+void cubrirConfirmarSalidaDibujar(tConfigPantalla* config);
 
 #endif // HUD_H_INCLUDED
