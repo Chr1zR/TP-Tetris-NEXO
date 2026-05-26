@@ -148,13 +148,13 @@ void fondoHudDibujar(tConfigPantalla* config)
 
     //  --- Fondo gris ---
 
-    rectanguloRelleno(0,0,config->hud.ancho_izq,config->ventana.alto,GA);
+    rectanguloRelleno(0,0,config->hud.ancho_izq,config->ventana.alto,GA, config);
     rectanguloRelleno(  config->hud.ancho_izq + config->tablero.ancho_px,
                         0,
                         config->hud.ancho_der,
                         config->ventana.alto,
                         GA
-    );
+    , config);
 
     // === Marcos decorativos===
     uint16_t clen = (sw >= 400) ? 14 : 7;
@@ -213,17 +213,17 @@ void cuadriculaDibujar(tTablero* tablero, tConfigPantalla* config)
     uint16_t i,j;
 
     //Fondo negro
-    rectanguloRelleno(config->tablero.offset_x, config->tablero.offset_y, config->tablero.ancho_px, config->tablero.alto_px,N);
+    rectanguloRelleno(config->tablero.offset_x, config->tablero.offset_y, config->tablero.ancho_px, config->tablero.alto_px,N, config);
 
     //Lineas verticales
     for(j = 0; j < config->tablero.columnas + 1; j++)
     {
-        lineaVDibujar(config->tablero.offset_x + (j * config->tablero.tam_bloque),config->tablero.offset_y, config->tablero.alto_px, CC);
+        lineaVDibujar(config->tablero.offset_x + (j * config->tablero.tam_bloque),config->tablero.offset_y, config->tablero.alto_px, CC, config);
     }
     //Lineas horizontales
     for(i = 0; i < config->tablero.filas + 1; i++)
     {
-        lineaHDibujar(config->tablero.offset_x, config->tablero.offset_y + (i * config->tablero.tam_bloque), config->tablero.ancho_px, CC);
+        lineaHDibujar(config->tablero.offset_x, config->tablero.offset_y + (i * config->tablero.tam_bloque), config->tablero.ancho_px, CC, config);
     }
 }
 void piezasAncladasDibujar(tTablero* t, tConfigPantalla* config)
@@ -243,7 +243,7 @@ void piezasAncladasDibujar(tTablero* t, tConfigPantalla* config)
                     config->tablero.offset_y + (i * config->tablero.tam_bloque),
                     config->tablero.tam_bloque,
                     config->tablero.tam_bloque,
-                     t->tablero[i][j]);
+                     t->tablero[i][j], config);
             }
         }
     }
@@ -266,7 +266,7 @@ void piezaActualDibujar(tTetromino* tetro, tConfigPantalla* config)
                     config->tablero.tam_bloque,
                     config->tablero.tam_bloque,
                     tetro->matriz[i][j]
-                );
+                , config);
             }
         }
     }
@@ -280,34 +280,12 @@ void tableroActualizarEstado(tTablero* t, tConfigPantalla* config, tJuego* juego
         return;
     }
 
-    tEstadoJuego* estado = juego->estado;
-    bool* game_over = &juego->game_over;
-
     t->pieza_actual->y++;
     if(posicionValida(t->pieza_actual, t, config))
     {
         return;
     }
     t->pieza_actual->y--;
-    piezaAnclar(t->pieza_actual, t, config);
-    if (t->pieza_actual->tipo != TETROMINO_NULO){
-        estado->conteo_piezas[(int)t->pieza_actual->tipo]++;
-        estado->piezas_totales++;
-    }
-    int limpias = lineasLimpiar(t, config, estado);
-    static const int puntos_por_lineas[5] = {0, 100, 300, 500, 800};
-    if (limpias >= 1 && limpias <= 4)
-        estado->puntos += puntos_por_lineas[limpias];
-
-    velocidadAplicarSiCorresponde(estado, &juego->intervalo_actual, &juego->temporizador);
-
-    tetrominoCopiar(t->pieza_actual, t->pieza_siguiente);
-    tetrominoAleatorio(t->pieza_siguiente, config->tablero.columnas);
-    if(!posicionValida(t->pieza_actual, t, config))
-    {
-        *game_over = true;
-        return;
-    }
 }
 bool posicionValida(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
@@ -352,6 +330,17 @@ bool puedeBajar(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
     bool valido = posicionValida(tetro, t, config);
     tetro->y = y_original;
     return valido;
+}
+bool piezaTocoFondo(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
+{
+    if(!tetro || !t)
+    {
+        return true;
+    }
+    tetro->y++;
+    bool valido = posicionValida(tetro, t, config);
+    tetro->y--;
+    return !valido;
 }
 bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
 {
@@ -461,6 +450,33 @@ void piezaAnclar(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
                 t->tablero[y][x] = tetro->matriz[i][j];
             }
         }
+    }
+}
+void piezaAnclarYContinuar(tTablero* t, tConfigPantalla* config, tJuego* juego)
+{
+    if(!t || !t->pieza_actual || !juego)
+        return;
+
+    tEstadoJuego* estado = juego->estado;
+
+    piezaAnclar(t->pieza_actual, t, config);
+    if (t->pieza_actual->tipo != TETROMINO_NULO){
+        estado->conteo_piezas[(int)t->pieza_actual->tipo]++;
+        estado->piezas_totales++;
+    }
+    int limpias = lineasLimpiar(t, config, estado);
+    static const int puntos_por_lineas[5] = {0, 100, 300, 500, 800};
+    if (limpias >= 1 && limpias <= 4)
+        estado->puntos += puntos_por_lineas[limpias];
+
+    velocidadAplicarSiCorresponde(estado, &juego->intervalo_actual, &juego->temporizador);
+
+    tetrominoCopiar(t->pieza_actual, t->pieza_siguiente);
+    tetrominoAleatorio(t->pieza_siguiente, config->tablero.columnas);
+    if(!posicionValida(t->pieza_actual, t, config))
+    {
+        juego->game_over = true;
+        return;
     }
 }
 int lineasLimpiar(tTablero* t, tConfigPantalla* config, tEstadoJuego* estado)

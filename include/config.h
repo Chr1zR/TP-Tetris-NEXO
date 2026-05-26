@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+typedef enum {
+    MODO_CLASICO,
+    MODO_DX
+} tModoJuego;
+
 typedef struct{
 
     uint16_t ancho;
@@ -51,6 +56,8 @@ typedef struct {
     tVentana ventana;
     tDisposicionTablero tablero;
     tHUD hud;
+    tModoJuego modo_juego;
+    double velocidad_inicial;
 }tConfigPantalla;
 
 
@@ -61,6 +68,8 @@ void configDestruir(tConfigPantalla* config);
 void anchosCalcular(tConfigPantalla* config);
 uint8_t modalidadObtener();
 uint8_t columnasDeluxeObtener();
+int configGuardar(tConfigPantalla* config, const char* ruta);
+int configCargar(tConfigPantalla* config, const char* ruta);
 
 
 #endif // CONFIG_H_INCLUDED

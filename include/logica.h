@@ -41,11 +41,13 @@ void tableroActualizarEstado(tTablero* tablero, tConfigPantalla* config, tJuego*
 bool posicionValida(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
 
 bool puedeBajar(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
+bool piezaTocoFondo(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
 bool puedeMoverIzquierda(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
 bool puedeMoverDerecha(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
 bool puedeRotar(tTetromino* tetro, tTablero* t, tConfigPantalla* config, bool sentido_derecha);
 
 void piezaAnclar(tTetromino* tetro, tTablero* t, tConfigPantalla* config);
+void piezaAnclarYContinuar(tTablero* t, tConfigPantalla* config, tJuego* juego);
 
 int lineasLimpiar(tTablero* t, tConfigPantalla* config, tEstadoJuego* estado);
 #endif // LOGICA_H_INCLUDED
