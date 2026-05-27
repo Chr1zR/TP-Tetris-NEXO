@@ -38,17 +38,26 @@ const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotac
             return (const uint8_t*)tetromino_T_rotaciones[rotacion];
         case TETROMINO_Z:
             return (const uint8_t*)tetromino_Z_rotaciones[rotacion];
+        case TETROMINO_X:
+            return (const uint8_t*)tetromino_X_rotaciones[rotacion];
+        case TETROMINO_C:
+            return (const uint8_t*)tetromino_C_rotaciones[rotacion];
+        case TETROMINO_P:
+            return (const uint8_t*)tetromino_P_rotaciones[rotacion];
+        case TETROMINO_ESTRELLA:
+            return (const uint8_t*)tetromino_ESTRELLA_rotaciones[rotacion];
         default:
             return NULL;
     }
 }
-void tetrominoAleatorio(tTetromino* tetromino, uint8_t col){
+void tetrominoAleatorio(tTetromino* tetromino, uint8_t col, bool piezas_extras){
 
     if(!tetromino){
         return;
     }
 
-    tetromino->tipo = rand() % 7;
+    int cantidad_tipos = piezas_extras ? 11 : 7;
+    tetromino->tipo = rand() % cantidad_tipos;
     tetromino->rotacion = 0;
 
     const uint8_t* matriz = tetrominoObtenerMatrizRotacion(tetromino->tipo, 0);
@@ -56,7 +65,7 @@ void tetrominoAleatorio(tTetromino* tetromino, uint8_t col){
         memcpy(tetromino->matriz, matriz, 16);
     }
 
-    tetromino ->x = rand() % (col -3);
+    tetromino ->x = rand() % (col - 3);
     tetromino ->y = 0;
     tetrominoCalcularLimites(tetromino);
 }

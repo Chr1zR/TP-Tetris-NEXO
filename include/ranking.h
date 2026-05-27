@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "vector.h"
 
 #define RANKING_MAX_NOMBRE 20
 #define RANKING_ARCHIVO "ranking.txt"
@@ -14,8 +15,6 @@ typedef struct {
     uint16_t lineas;
     char fecha_hora[20];
 } tEntradaRanking;
-
-typedef struct sVector tVector;
 
 typedef struct {
     tVector* entradas;

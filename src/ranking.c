@@ -1,5 +1,4 @@
 #include "../include/ranking.h"
-#include "../include/vector.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +22,7 @@ tRanking* ranking_crear(size_t max_entradas)
     if (!rank)
         return NULL;
 
-    rank->entradas = vector_crear(max_entradas);
+    rank->entradas = vector_crear(max_entradas, sizeof(tEntradaRanking));
     if (!rank->entradas) {
         free(rank);
         return NULL;
@@ -35,7 +34,7 @@ tRanking* ranking_crear(size_t max_entradas)
 
 static bool ranking_esta_lleno(tRanking* rank)
 {
-    return vector_tamanio(rank->entradas) >= (size_t)rank->max_entradas;
+    return vector_tamanio(rank->entradas) >= rank->max_entradas;
 }
 
 static tEntradaRanking* ranking_peor_entrada(tRanking* rank)
@@ -57,12 +56,6 @@ int ranking_agregar(tRanking* rank, const char* nombre, uint32_t puntos, uint16_
     if (!rank || !nombre)
         return -1;
 
-    if (ranking_esta_lleno(rank)) {
-        tEntradaRanking* peor = ranking_peor_entrada(rank);
-        if (peor && puntos <= peor->puntos)
-            return -1;
-    }
-
     tEntradaRanking entrada;
     memset(&entrada, 0, sizeof(tEntradaRanking));
     strncpy(entrada.nombre, nombre, RANKING_MAX_NOMBRE - 1);
@@ -71,12 +64,21 @@ int ranking_agregar(tRanking* rank, const char* nombre, uint32_t puntos, uint16_
     entrada.lineas = lineas;
     formatear_fecha_hora(entrada.fecha_hora, sizeof(entrada.fecha_hora));
 
-    int resultado = vector_agregar(rank->entradas, &entrada, sizeof(tEntradaRanking));
+    if (ranking_esta_lleno(rank)) {
+        tEntradaRanking* peor = ranking_peor_entrada(rank);
+        if (peor && puntos <= peor->puntos)
+            return -1;
 
-    if (resultado == 0)
-        ranking_guardar(rank);
+        size_t indice_peor = (size_t)(peor - (tEntradaRanking*)rank->entradas->datos);
+        vector_modificar(rank->entradas, indice_peor, &entrada, sizeof(entrada));
+    } else {
+        if (vector_agregar(rank->entradas, &entrada, sizeof(entrada)) != 0)
+            return -1;
+    }
 
-    return resultado;
+    ranking_ordenar_por_puntos(rank);
+    ranking_guardar(rank);
+    return 0;
 }
 
 bool ranking_guardar(tRanking* rank)
@@ -91,10 +93,13 @@ bool ranking_guardar(tRanking* rank)
     size_t cant = vector_tamanio(rank->entradas);
     for (size_t i = 0; i < cant; i++) {
         tEntradaRanking* e = (tEntradaRanking*)vector_obtener(rank->entradas, i);
-        fprintf(fp, "%s%c%lu%c%s\n",
+        if (fprintf(fp, "%s%c%lu%c%s\n",
                 e->nombre, SEPARADOR,
                 (unsigned long)e->puntos, SEPARADOR,
-                e->fecha_hora);
+                e->fecha_hora) < 0) {
+            fclose(fp);
+            return false;
+        }
     }
 
     fclose(fp);
@@ -111,36 +116,38 @@ bool ranking_cargar(tRanking* rank)
         return false;
 
     char linea[256];
-    while (fgets(linea, sizeof(linea), fp)) {
+    char sep[2] = {SEPARADOR, '\0'};
+    size_t cargadas = 0;
+
+    while (fgets(linea, sizeof(linea), fp) && cargadas < rank->max_entradas) {
         char* token;
         char* resto = linea;
 
-        token = strtok(resto, "|");
+        token = strtok(resto, sep);
         if (!token) continue;
         tEntradaRanking entrada;
         memset(&entrada, 0, sizeof(tEntradaRanking));
         strncpy(entrada.nombre, token, RANKING_MAX_NOMBRE - 1);
         entrada.nombre[RANKING_MAX_NOMBRE - 1] = '\0';
 
-        token = strtok(NULL, "|");
+        token = strtok(NULL, sep);
         if (!token) continue;
         entrada.puntos = (uint32_t)strtoul(token, NULL, 10);
 
-        char* token_siguiente = strtok(NULL, "|");
+        char* token_siguiente = strtok(NULL, sep);
         if (!token_siguiente) continue;
 
-        char* token_extra = strtok(NULL, "|");
+        char* token_extra = strtok(NULL, sep);
         if (token_extra) {
-            // Formato viejo de 4 campos: nombre|puntos|lineas|fecha
             entrada.lineas = (uint16_t)strtoul(token_siguiente, NULL, 10);
             strncpy(entrada.fecha_hora, token_extra, sizeof(entrada.fecha_hora) - 1);
         } else {
-            // Formato nuevo de 3 campos: nombre|puntos|fecha
             strncpy(entrada.fecha_hora, token_siguiente, sizeof(entrada.fecha_hora) - 1);
         }
         entrada.fecha_hora[sizeof(entrada.fecha_hora) - 1] = '\0';
 
         vector_agregar(rank->entradas, &entrada, sizeof(tEntradaRanking));
+        cargadas++;
     }
 
     fclose(fp);
@@ -174,11 +181,9 @@ bool ranking_borrar(tRanking* rank)
 
 static int comparar_puntos_desc(const void* a, const void* b)
 {
-    tEntradaRanking* ea = (tEntradaRanking*)a;
-    tEntradaRanking* eb = (tEntradaRanking*)b;
-    if (eb->puntos > ea->puntos) return 1;
-    if (eb->puntos < ea->puntos) return -1;
-    return 0;
+    const tEntradaRanking* ea = (const tEntradaRanking*)a;
+    const tEntradaRanking* eb = (const tEntradaRanking*)b;
+    return (eb->puntos > ea->puntos) - (eb->puntos < ea->puntos);
 }
 
 void ranking_ordenar_por_puntos(tRanking* rank)

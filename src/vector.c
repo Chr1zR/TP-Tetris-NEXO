@@ -2,14 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct sVector {
-    void* datos;
-    size_t capacidad;
-    size_t cantidad;
-    size_t element_size;
-};
-
-tVector* vector_crear(size_t capacidad_inicial)
+tVector* vector_crear(size_t capacidad_inicial, size_t tamElem)
 {
     if (capacidad_inicial == 0)
         capacidad_inicial = 8;
@@ -18,15 +11,15 @@ tVector* vector_crear(size_t capacidad_inicial)
     if (!v)
         return NULL;
 
-    v->datos = malloc(capacidad_inicial * 64);
+    v->datos = malloc(capacidad_inicial * tamElem);
     if (!v->datos) {
         free(v);
         return NULL;
     }
 
-    v->capacidad = capacidad_inicial;
-    v->cantidad = 0;
-    v->element_size = 0;
+    v->cap = capacidad_inicial;
+    v->ce = 0;
+    v->tamElem = tamElem;
 
     return v;
 }
@@ -36,61 +29,72 @@ int vector_agregar(tVector* v, const void* elemento, size_t tam_elemento)
     if (!v || !elemento)
         return -1;
 
-    if (v->element_size == 0)
-        v->element_size = tam_elemento;
-
-    if (v->element_size != tam_elemento)
+    if (v->tamElem != tam_elemento)
         return -1;
 
-    if (v->cantidad >= v->capacidad) {
-        size_t nueva_cap = v->capacidad * 2;
-        void* nuevos_datos = realloc(v->datos, nueva_cap * v->element_size);
+    if (v->ce >= v->cap) {
+        size_t nueva_cap = v->cap * 2;
+        void* nuevos_datos = realloc(v->datos, nueva_cap * v->tamElem);
         if (!nuevos_datos)
             return -1;
         v->datos = nuevos_datos;
-        v->capacidad = nueva_cap;
+        v->cap = nueva_cap;
     }
 
-    char* dst = (char*)v->datos + (v->cantidad * v->element_size);
+    char* dst = (char*)v->datos + (v->ce * v->tamElem);
     memcpy(dst, elemento, tam_elemento);
-    v->cantidad++;
+    v->ce++;
 
     return 0;
 }
 
 void* vector_obtener(tVector* v, size_t indice)
 {
-    if (!v || indice >= v->cantidad)
+    if (!v || indice >= v->ce)
         return NULL;
 
-    return (char*)v->datos + (indice * v->element_size);
+    return (char*)v->datos + (indice * v->tamElem);
+}
+
+int vector_modificar(tVector* v, size_t indice, const void* elemento, size_t tam_elemento)
+{
+    if (!v || !elemento)
+        return -1;
+    if (indice >= v->ce)
+        return -1;
+    if (v->tamElem != tam_elemento)
+        return -1;
+
+    char* dst = (char*)v->datos + (indice * v->tamElem);
+    memcpy(dst, elemento, tam_elemento);
+    return 0;
 }
 
 size_t vector_tamanio(tVector* v)
 {
     if (!v)
         return 0;
-    return v->cantidad;
+    return v->ce;
 }
 
 size_t vector_capacidad(tVector* v)
 {
     if (!v)
         return 0;
-    return v->capacidad;
+    return v->cap;
 }
 
 bool vector_vacio(tVector* v)
 {
     if (!v)
         return true;
-    return v->cantidad == 0;
+    return v->ce == 0;
 }
 
 void vector_vaciar(tVector* v)
 {
     if (v)
-        v->cantidad = 0;
+        v->ce = 0;
 }
 
 void vector_destruir(tVector* v)

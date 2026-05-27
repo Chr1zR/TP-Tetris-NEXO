@@ -6,5 +6,6 @@
 #include "config.h"
 
 int iniciar_plataforma(char* nombreVentana, size_t tam, tConfigPantalla* config);
+int reiniciar_plataforma(tConfigPantalla* config);
 void parar_plataforma(tGBT_Temporizador* temporizador, tGBT_Temporizador* temporizador_s);
 #endif // PLATAFORMA_H_INCLUDED

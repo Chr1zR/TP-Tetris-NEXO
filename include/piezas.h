@@ -15,13 +15,18 @@ typedef enum {
     TETROMINO_S,
     TETROMINO_T,
     TETROMINO_Z,
+    TETROMINO_X,
+    TETROMINO_C,
+    TETROMINO_P,
+    TETROMINO_ESTRELLA,
 }tTipoTetromino;
 
-typedef struct{
+typedef struct sTetromino{
     tTipoTetromino tipo;
     uint8_t matriz[4][4];
     uint8_t rotacion;
-    uint16_t x,y;
+    int x;
+    uint16_t y;
     uint8_t min_fila, max_fila, min_col, max_col;
 }tTetromino;
 
@@ -208,9 +213,116 @@ static const uint8_t tetromino_Z_rotaciones[4][4][4] = {
     }
 };
 
+static const uint8_t tetromino_X_rotaciones[4][4][4] = {
+    {
+        {AC, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {AC, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {AC, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {AC, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    }
+};
+
+static const uint8_t tetromino_C_rotaciones[4][4][4] = {
+    {
+        {NC, NC, 0, 0},
+        {NC, 0, 0, 0},
+        {NC, NC, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {NC, NC, NC, 0},
+        {NC, 0, NC, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {NC, NC, 0, 0},
+        {0, NC, 0, 0},
+        {NC, NC, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {NC, 0, NC, 0},
+        {NC, NC,NC, 0},
+        {0, 0,  0,  0},
+        {0, 0,  0,  0}
+    }
+};
+
+static const uint8_t tetromino_P_rotaciones[4][4][4] = {
+    {
+        {AO, AO, 0, 0},
+        {AO, AO, 0, 0},
+        {AO, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {AO, AO, AO, 0},
+        {0, AO, AO, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {0, AO, 0, 0},
+        {AO, AO, 0, 0},
+        {AO, AO, 0, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {AO, AO, 0, 0},
+        {AO, AO, AO, 0},
+        {0, 0, 0, 0},
+        {0, 0, 0, 0}
+    }
+};
+
+static const uint8_t tetromino_ESTRELLA_rotaciones[4][4][4] = {
+    {
+        {GA, GA, GA, 0},
+        {0, GA, 0, 0},
+        {GA, GA, GA, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {GA, 0, GA, 0},
+        {GA, GA, GA, 0},
+        {GA, 0, GA, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {GA, GA, GA, 0},
+        {0, GA, 0, 0},
+        {GA, GA, GA, 0},
+        {0, 0, 0, 0}
+    },
+    {
+        {GA, 0, GA, 0},
+        {GA, GA, GA, 0},
+        {GA, 0, GA, 0},
+        {0, 0, 0, 0}
+    }
+};
 
 tTetromino* tetrominoCrear();
-void tetrominoAleatorio(tTetromino* t, uint8_t col);
+void tetrominoAleatorio(tTetromino* t, uint8_t col, bool piezas_extras);
 void tetrominoCopiar(tTetromino* destino, tTetromino* origen);
 void tetrominoRotar(tTetromino* tetro, bool sentido_derecha);
 void tetrominoBajar(tTetromino* tetro);

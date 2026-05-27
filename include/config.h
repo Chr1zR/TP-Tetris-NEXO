@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#include <stdbool.h>
+
+#define FILAS_INVISIBLES 2
+
 typedef enum {
     MODO_CLASICO,
     MODO_DX
@@ -17,7 +21,8 @@ typedef struct{
 
 typedef struct {
     uint8_t columnas;
-    uint8_t filas;
+    uint8_t filas;           // total: visibles + invisibles
+    uint8_t filas_visibles;  // solo las visibles en pantalla
     uint16_t tam_bloque;
 
     uint16_t ancho_px;
@@ -58,16 +63,16 @@ typedef struct {
     tHUD hud;
     tModoJuego modo_juego;
     double velocidad_inicial;
+    bool tablero_circular;
+    bool piezas_extras;
+    bool cheats_habilitados;
 }tConfigPantalla;
 
 
-//static void tConfigInicializar(tConfigPantalla* config);
-tConfigPantalla* crear_config_default();
-tConfigPantalla* crear_config(char* argv[]);
+tConfigPantalla* crear_config(int argc, char* argv[]);
 void configDestruir(tConfigPantalla* config);
+void configGeometriaRecalcular(tConfigPantalla* config);
 void anchosCalcular(tConfigPantalla* config);
-uint8_t modalidadObtener();
-uint8_t columnasDeluxeObtener();
 int configGuardar(tConfigPantalla* config, const char* ruta);
 int configCargar(tConfigPantalla* config, const char* ruta);
 
