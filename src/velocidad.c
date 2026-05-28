@@ -6,7 +6,8 @@ void velocidadAplicarSiCorresponde(tEstadoJuego* estado, double* intervalo_actua
         return;
 
     if(estado->piezas_totales > 0 && estado->piezas_totales % PIEZAS_POR_NIVEL == 0){
-        *intervalo_actual *= FACTOR_REDICCION;
+        estado->nivel++;
+        *intervalo_actual *= FACTOR_REDUCCION;
 
         if(*temporizador){
             gbt_temporizador_destruir(*temporizador);
