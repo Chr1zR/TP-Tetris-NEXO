@@ -6,6 +6,12 @@
 
 static const char SEPARADOR = '|';
 
+/**
+ * @desc Formatea fecha y hora actual en buffer.
+ * @param buffer char* Buffer de salida.
+ * @param tam_buffer size_t Tamano del buffer.
+ * @return void
+ */
 static void formatear_fecha_hora(char* buffer, size_t tam_buffer)
 {
     time_t ahora = time(NULL);
@@ -32,23 +38,36 @@ tRanking* ranking_crear(size_t max_entradas)
     return rank;
 }
 
+/**
+ * @desc Verifica si el ranking alcanzo su capacidad maxima.
+ * @param rank tRanking* Puntero al ranking.
+ * @return bool true si esta lleno, false si no.
+ */
 static bool ranking_esta_lleno(tRanking* rank)
 {
     return vector_tamanio(rank->entradas) >= rank->max_entradas;
 }
 
-static tEntradaRanking* ranking_peor_entrada(tRanking* rank)
+/**
+ * @desc Busca la entrada con menor puntaje.
+ * @param rank tRanking* Puntero al ranking.
+ * @return size_t Indice de la peor entrada o (size_t)-1 si vacio.
+ */
+static size_t ranking_indice_peor_entrada(tRanking* rank)
 {
     size_t cant = vector_tamanio(rank->entradas);
-    if (cant == 0) return NULL;
+    if (cant == 0) return (size_t)-1;
 
+    size_t indice_peor = 0;
     tEntradaRanking* peor = (tEntradaRanking*)vector_obtener(rank->entradas, 0);
     for (size_t i = 1; i < cant; i++) {
         tEntradaRanking* actual = (tEntradaRanking*)vector_obtener(rank->entradas, i);
-        if (actual && (!peor || actual->puntos < peor->puntos))
+        if (actual && actual->puntos < peor->puntos) {
             peor = actual;
+            indice_peor = i;
+        }
     }
-    return peor;
+    return indice_peor;
 }
 
 int ranking_agregar(tRanking* rank, const char* nombre, uint32_t puntos, uint16_t lineas)
@@ -65,11 +84,14 @@ int ranking_agregar(tRanking* rank, const char* nombre, uint32_t puntos, uint16_
     formatear_fecha_hora(entrada.fecha_hora, sizeof(entrada.fecha_hora));
 
     if (ranking_esta_lleno(rank)) {
-        tEntradaRanking* peor = ranking_peor_entrada(rank);
+        size_t indice_peor = ranking_indice_peor_entrada(rank);
+        if (indice_peor == (size_t)-1)
+            return -1;
+
+        tEntradaRanking* peor = (tEntradaRanking*)vector_obtener(rank->entradas, indice_peor);
         if (peor && puntos <= peor->puntos)
             return -1;
 
-        size_t indice_peor = (size_t)(peor - (tEntradaRanking*)rank->entradas->datos);
         vector_modificar(rank->entradas, indice_peor, &entrada, sizeof(entrada));
     } else {
         if (vector_agregar(rank->entradas, &entrada, sizeof(entrada)) != 0)
@@ -93,9 +115,14 @@ bool ranking_guardar(tRanking* rank)
     size_t cant = vector_tamanio(rank->entradas);
     for (size_t i = 0; i < cant; i++) {
         tEntradaRanking* e = (tEntradaRanking*)vector_obtener(rank->entradas, i);
-        if (fprintf(fp, "%s%c%lu%c%s\n",
+        if (!e) {
+            fclose(fp);
+            return false;
+        }
+        if (fprintf(fp, "%s%c%lu%c%u%c%s\n",
                 e->nombre, SEPARADOR,
                 (unsigned long)e->puntos, SEPARADOR,
+                (unsigned)e->lineas, SEPARADOR,
                 e->fecha_hora) < 0) {
             fclose(fp);
             return false;
@@ -146,7 +173,15 @@ bool ranking_cargar(tRanking* rank)
         }
         entrada.fecha_hora[sizeof(entrada.fecha_hora) - 1] = '\0';
 
-        vector_agregar(rank->entradas, &entrada, sizeof(tEntradaRanking));
+        size_t len = strlen(entrada.fecha_hora);
+        while (len > 0 && (entrada.fecha_hora[len - 1] == '\n' || entrada.fecha_hora[len - 1] == '\r')) {
+            entrada.fecha_hora[--len] = '\0';
+        }
+
+        if (vector_agregar(rank->entradas, &entrada, sizeof(tEntradaRanking)) != 0) {
+            fclose(fp);
+            return false;
+        }
         cargadas++;
     }
 
@@ -179,6 +214,12 @@ bool ranking_borrar(tRanking* rank)
     return true;
 }
 
+/**
+ * @desc Funcion de comparacion para qsort descendente por puntos.
+ * @param a const void* Puntero a entrada A.
+ * @param b const void* Puntero a entrada B.
+ * @return int Diferencia de puntaje.
+ */
 static int comparar_puntos_desc(const void* a, const void* b)
 {
     const tEntradaRanking* ea = (const tEntradaRanking*)a;

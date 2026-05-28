@@ -53,7 +53,7 @@ typedef struct{
 typedef struct {
     uint16_t ancho_izq;
     uint16_t ancho_der;
-    tDisposicionHud disposicion;     // Coordenadas puntos, pieza siguiente, nivel, etc.
+    tDisposicionHud disposicion;
 } tHUD;
 
 typedef struct {
@@ -69,11 +69,49 @@ typedef struct {
 }tConfigPantalla;
 
 
+/**
+ * @desc Crea configuracion desde argumentos CLI o valores default.
+ * @param argc int Cantidad de argumentos.
+ * @param argv char** Vector de argumentos.
+ * @return tConfigPantalla* Puntero a config o NULL si error.
+ */
 tConfigPantalla* crear_config(int argc, char* argv[]);
+
+/**
+ * @desc Libera la memoria de la configuracion.
+ * @param config tConfigPantalla* Puntero a la configuracion.
+ * @return void
+ */
 void configDestruir(tConfigPantalla* config);
+
+/**
+ * @desc Recalcula geometria del tablero segun ventana.
+ * @param config tConfigPantalla* Puntero a la configuracion.
+ * @return void
+ */
 void configGeometriaRecalcular(tConfigPantalla* config);
+
+/**
+ * @desc Calcula offsets y anchos del HUD.
+ * @param config tConfigPantalla* Puntero a la configuracion.
+ * @return void
+ */
 void anchosCalcular(tConfigPantalla* config);
+
+/**
+ * @desc Guarda configuracion a archivo de texto.
+ * @param config tConfigPantalla* Puntero a la configuracion.
+ * @param ruta const char* Ruta del archivo.
+ * @return int 0 si ok, -1 si error.
+ */
 int configGuardar(tConfigPantalla* config, const char* ruta);
+
+/**
+ * @desc Carga configuracion desde archivo de texto.
+ * @param config tConfigPantalla* Puntero a la configuracion.
+ * @param ruta const char* Ruta del archivo.
+ * @return int 0 si ok, -1 si error.
+ */
 int configCargar(tConfigPantalla* config, const char* ruta);
 
 

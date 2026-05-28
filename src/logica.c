@@ -218,6 +218,16 @@ bool puedeMoverDerecha(tTetromino* tetro, tTablero* t, tConfigPantalla* config)
     tetro->x = x_original;
     return valido;
 }
+
+/**
+ * @desc Valida si una matriz cabe en una posicion del tablero.
+ * @param x int Coordenada X.
+ * @param y int Coordenada Y.
+ * @param matriz const uint8_t* Matriz 4x4 plana.
+ * @param t tTablero* Puntero al tablero.
+ * @param config tConfigPantalla* Configuracion de pantalla.
+ * @return bool true si cabe, false si no.
+ */
 static bool validarMatrizEnPosicion(int x, int y, const uint8_t* matriz, tTablero* t, tConfigPantalla* config)
 {
 

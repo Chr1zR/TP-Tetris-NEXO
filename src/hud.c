@@ -292,6 +292,18 @@ static const uint8_t ancho_digitos[10] = {
     3, 4, 3, 3, 3, 3, 3, 3, 3, 3
 };
 
+/**
+ * @desc Dibuja efectos de neon en las esquinas de un rectangulo.
+ * @param x0 uint16_t Coordenada X inicial.
+ * @param y0 uint16_t Coordenada Y inicial.
+ * @param x1 uint16_t Coordenada X final.
+ * @param y1 uint16_t Coordenada Y final.
+ * @param color uint8_t Color de los neon.
+ * @param clen uint16_t Longitud de la linea de neon.
+ * @param sw uint16_t Ancho de la ventana.
+ * @param sh uint16_t Alto de la ventana.
+ * @return void No retorna valor.
+ */
 static void neonEsquinas(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
                           uint8_t color, uint16_t clen, uint16_t sw, uint16_t sh)
 {
@@ -371,32 +383,81 @@ void fondoHudDibujar(tConfigPantalla* config)
 #define ETIQUETA_ALTO_VGA 15
 #define ETIQUETA_ALTO_CGA 8
 
+/**
+ * @desc Determina si la pantalla esta en modo CGA.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return bool Verdadero si es modo CGA.
+ */
 static inline bool esCGA(tConfigPantalla* config) {
     return config->ventana.ancho < 400;
 }
 
+/**
+ * @desc Obtiene el margen del HUD segun la resolucion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return uint16_t Valor del margen.
+ */
 static inline uint16_t hudMargen(tConfigPantalla* config) {
     return esCGA(config) ? MARGEN_CGA : MARGEN_VGA;
 }
 
+/**
+ * @desc Obtiene el alto de la caja del HUD segun la resolucion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return uint16_t Alto de la caja.
+ */
 static inline uint16_t hudAltoCaja(tConfigPantalla* config) {
     return esCGA(config) ? ALTO_CAJA_CGA : ALTO_CAJA_VGA;
 }
 
+/**
+ * @desc Obtiene la escala de etiquetas del HUD segun la resolucion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return uint8_t Escala de etiquetas.
+ */
 static inline uint8_t hudEscala(tConfigPantalla* config) {
     return esCGA(config) ? ETIQUETA_ESCALA_CGA : ETIQUETA_ESCALA_VGA;
 }
 
+/**
+ * @desc Obtiene el desplazamiento Y de la etiqueta segun la resolucion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return uint16_t Desplazamiento Y.
+ */
 static inline uint16_t hudEtiquetaDY(tConfigPantalla* config) {
     return esCGA(config) ? ETIQUETA_DY_CGA : ETIQUETA_DY_VGA;
 }
 
+/**
+ * @desc Obtiene el alto de la etiqueta segun la resolucion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return uint16_t Alto de la etiqueta.
+ */
 static inline uint16_t hudEtiquetaAlto(tConfigPantalla* config) {
     return esCGA(config) ? ETIQUETA_ALTO_CGA : ETIQUETA_ALTO_VGA;
 }
 
+/**
+ * @desc Forward declaration de hudDigitoDibujar. Dibuja un digito numerico en pantalla.
+ * @param x uint16_t Coordenada X.
+ * @param y uint16_t Coordenada Y.
+ * @param numero uint8_t Digito a dibujar (0-9).
+ * @param color uint8_t Color del digito.
+ * @param escala uint8_t Escala de dibujo.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void hudDigitoDibujar(uint16_t x, uint16_t y, uint8_t numero, uint8_t color, uint8_t escala, tConfigPantalla* config);
 
+/**
+ * @desc Fija las coordenadas de una posicion del HUD.
+ * @param pos tPosHud* Puntero a la estructura de posicion.
+ * @param x_inicial uint16_t Coordenada X inicial.
+ * @param y_inicial uint16_t Coordenada Y inicial.
+ * @param x_final uint16_t Coordenada X final.
+ * @param y_final uint16_t Coordenada Y final.
+ * @return void No retorna valor.
+ */
 static void posFijar(tPosHud* pos, uint16_t x_inicial, uint16_t y_inicial, uint16_t x_final, uint16_t y_final)
 {
     pos->offset_x_inicial = x_inicial;
@@ -405,6 +466,15 @@ static void posFijar(tPosHud* pos, uint16_t x_inicial, uint16_t y_inicial, uint1
     pos->offset_y_final = y_final;
 }
 
+/**
+ * @desc Obtiene los limites de un tetromino a partir de su matriz.
+ * @param mat const uint8_t* Puntero a la matriz del tetromino.
+ * @param fila_min uint8_t* Puntero a la fila minima.
+ * @param fila_max uint8_t* Puntero a la fila maxima.
+ * @param col_min uint8_t* Puntero a la columna minima.
+ * @param col_max uint8_t* Puntero a la columna maxima.
+ * @return void No retorna valor.
+ */
 static void tetrominoLimitesObtener(const uint8_t* mat, uint8_t* fila_min, uint8_t* fila_max, uint8_t* col_min, uint8_t* col_max)
 {
     *fila_min = 4; *fila_max = 0; *col_min = 4; *col_max = 0;
@@ -489,6 +559,16 @@ uint8_t hudCaracterAncho(char c)
     return 2;
 }
 
+/**
+ * @desc Dibuja una letra en pantalla.
+ * @param x uint16_t Coordenada X.
+ * @param y uint16_t Coordenada Y.
+ * @param c char Caracter a dibujar.
+ * @param color uint8_t Color de la letra.
+ * @param escala uint8_t Escala de dibujo.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void hudLetraDibujar(uint16_t x, uint16_t y, char c, uint8_t color, uint8_t escala, tConfigPantalla* config)
 {
     uint8_t indice;
@@ -546,6 +626,12 @@ void hudPalabraDibujar(const char* palabra, uint16_t pos_x, uint16_t pos_y, uint
     }
 }
 
+/**
+ * @desc Calcula el ancho de un texto en pixeles.
+ * @param texto const char* Cadena de texto.
+ * @param escala uint8_t Escala del texto.
+ * @return uint16_t Ancho total en pixeles.
+ */
 static uint16_t hudTextoAncho(const char* texto, uint8_t escala)
 {
     if (!texto || !texto[0]) return 0;
@@ -567,6 +653,13 @@ static uint16_t hudTextoAncho(const char* texto, uint8_t escala)
     return ancho > 0 ? ancho - 1 : 0;
 }
 
+/**
+ * @desc Calcula la coordenada X para centrar un texto en un recuadro.
+ * @param recuadro tPosHud Recuadro del HUD.
+ * @param texto const char* Cadena de texto.
+ * @param escala uint8_t Escala del texto.
+ * @return uint16_t Coordenada X inicial centrada.
+ */
 static uint16_t hudCentrarTexto(tPosHud recuadro, const char* texto, uint8_t escala)
 {
     uint16_t ancho = recuadro.offset_x_final - recuadro.offset_x_inicial;
@@ -574,6 +667,11 @@ static uint16_t hudCentrarTexto(tPosHud recuadro, const char* texto, uint8_t esc
     return recuadro.offset_x_inicial + (ancho > largo ? (ancho - largo) / 2 : 0);
 }
 
+/**
+ * @desc Cuenta la cantidad de digitos de un numero.
+ * @param numero uint32_t Numero a evaluar.
+ * @return uint8_t Cantidad de digitos.
+ */
 static uint8_t contarDigitos(uint32_t numero)
 {
     if (numero == 0) return 1;
@@ -582,12 +680,28 @@ static uint8_t contarDigitos(uint32_t numero)
     return cant;
 }
 
+/**
+ * @desc Extrae un digito de un numero en una posicion dada.
+ * @param numero uint32_t Numero fuente.
+ * @param posicion uint8_t Posicion del digito (0 = unidades).
+ * @return uint8_t Digito extraido.
+ */
 static uint8_t extraerDigito(uint32_t numero, uint8_t posicion)
 {
     for (uint8_t i = 0; i < posicion; i++) numero /= 10;
     return numero % 10;
 }
 
+/**
+ * @desc Dibuja un digito numerico en pantalla.
+ * @param x uint16_t Coordenada X.
+ * @param y uint16_t Coordenada Y.
+ * @param numero uint8_t Digito a dibujar (0-9).
+ * @param color uint8_t Color del digito.
+ * @param escala uint8_t Escala de dibujo.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void hudDigitoDibujar(uint16_t x, uint16_t y, uint8_t numero, uint8_t color, uint8_t escala, tConfigPantalla* config)
 {
     if (numero > 9) return;
@@ -600,6 +714,14 @@ static void hudDigitoDibujar(uint16_t x, uint16_t y, uint8_t numero, uint8_t col
     bitmapDibujar(bitmaps_digitos[numero], x, y, ancho_digitos[numero], ALTO_NUMERO, color, escala, config);
 }
 
+/**
+ * @desc Dibuja dos puntos separadores de tiempo.
+ * @param x uint16_t Coordenada X.
+ * @param y uint16_t Coordenada Y.
+ * @param color uint8_t Color de los puntos.
+ * @param escala uint8_t Escala de dibujo.
+ * @return void No retorna valor.
+ */
 static void hudDosPuntosDibujar(uint16_t x, uint16_t y, uint8_t color, uint8_t escala)
 {
     uint16_t y_centro = y + (ALTO_NUMERO * escala / 2);
@@ -609,6 +731,15 @@ static void hudDosPuntosDibujar(uint16_t x, uint16_t y, uint8_t color, uint8_t e
     }
 }
 
+/**
+ * @desc Dibuja una etiqueta y un valor numerico dentro de una caja del HUD.
+ * @param caja tPosHud Dimensiones de la caja.
+ * @param etiqueta const char* Texto de la etiqueta.
+ * @param valor uint32_t Valor numerico a mostrar.
+ * @param escala uint8_t Escala de los digitos.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void hudValorEnCaja(tPosHud caja, const char* etiqueta, uint32_t valor, uint8_t escala, tConfigPantalla* config)
 {
     uint8_t escala_etiq = hudEscala(config);
@@ -773,18 +904,48 @@ void hudTituloNeonDibujar(tConfigPantalla* config)
     hudPalabraDibujar("GRUPO NEXO", (ancho_panel > ancho_sub ? (ancho_panel - ancho_sub) / 2 : 0), y_sub, NA, escala_sub, config);
 }
 
+/**
+ * @desc Dibuja un panel relleno con borde.
+ * @param x uint16_t Coordenada X inicial.
+ * @param y uint16_t Coordenada Y inicial.
+ * @param ancho uint16_t Ancho del panel.
+ * @param alto uint16_t Alto del panel.
+ * @param color uint8_t Color del borde.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void panelDibujar(uint16_t x, uint16_t y, uint16_t ancho, uint16_t alto, uint8_t color, tConfigPantalla* config)
 {
     rectanguloRelleno(x, y, ancho, alto, N, config);
     rectanguloDibujar(x, y, ancho, alto, color, config);
 }
 
+/**
+ * @desc Dibuja un texto centrado en un punto dado.
+ * @param texto const char* Cadena de texto.
+ * @param centro_x uint16_t Coordenada X del centro.
+ * @param centro_y uint16_t Coordenada Y del centro.
+ * @param color uint8_t Color del texto.
+ * @param escala uint8_t Escala del texto.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void textoCentradoDibujar(const char* texto, uint16_t centro_x, uint16_t centro_y, uint8_t color, uint8_t escala, tConfigPantalla* config)
 {
     if (!config || !texto) return;
     hudPalabraDibujar(texto, centro_x - hudTextoAncho(texto, escala) / 2, centro_y - (ALTO_LETRA * escala) / 2, color, escala, config);
 }
 
+/**
+ * @desc Dibuja un menu de opciones con una seleccion resaltada.
+ * @param opciones const char** Arreglo de cadenas con las opciones.
+ * @param cantidad uint8_t Cantidad de opciones.
+ * @param centro_x uint16_t Coordenada X del centro.
+ * @param y uint16_t* Puntero a la coordenada Y inicial (se actualiza).
+ * @param seleccion uint8_t Indice de la opcion seleccionada.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void menuOpcionesDibujar(const char** opciones, uint8_t cantidad, uint16_t centro_x, uint16_t* y, uint8_t seleccion, tConfigPantalla* config)
 {
     uint8_t escala = hudEscala(config);
@@ -794,7 +955,7 @@ static void menuOpcionesDibujar(const char** opciones, uint8_t cantidad, uint16_
     for (uint8_t i = 0; i < cantidad; i++) {
         if (i == seleccion) {
             uint16_t ancho_opcion = hudTextoAncho(opciones[i], escala);
-            uint16_t x_opcion = centro_x - ancho_opcion / 2 - 6, y_opcion = *y - pad / 2;
+            uint16_t x_opcion = centro_x - ancho_opcion / 2 - 6, y_opcion = *y - pad / 2 - 2;
             rectanguloRelleno(x_opcion, y_opcion, ancho_opcion + 12, ALTO_LETRA * escala + pad, AO, config);
             rectanguloDibujar(x_opcion, y_opcion, ancho_opcion + 12, ALTO_LETRA * escala + pad, CC, config);
             textoCentradoDibujar(opciones[i], centro_x, *y, CC, escala, config);
@@ -932,8 +1093,8 @@ void cubrirGameOverDibujar(tConfigPantalla* config, uint32_t score, uint16_t lin
     y += ALTO_NUMERO * 2 + 15;
     lineaHDibujar(x_panel + 20, y, ancho_panel - 40, M, config);
     y += 15;
-    static const char* opciones[] = {"REINICIAR", "SALIR"};
-    menuOpcionesDibujar(opciones, 2, centro_x, &y, seleccion, config);
+    static const char* opciones[] = {"REINICIAR", "MENU PRINCIPAL", "SALIR"};
+    menuOpcionesDibujar(opciones, 3, centro_x, &y, seleccion, config);
 }
 
 void cubrirConfirmarSalidaDibujar(tConfigPantalla* config)
@@ -953,6 +1114,11 @@ void cubrirConfirmarSalidaDibujar(tConfigPantalla* config)
 #define TAM_BLOQUE_PRESENTACION 8
 #define VELOCIDAD_CADA 2
 
+/**
+ * @desc Dibuja el fondo animado de la pantalla de presentacion.
+ * @param config tConfigPantalla* Puntero a la configuracion de pantalla.
+ * @return void No retorna valor.
+ */
 static void fondoPresentacionDibujar(tConfigPantalla* config)
 {
     if (!config) return;
@@ -1144,7 +1310,7 @@ void menuConfiguracionDibujar(tConfigPantalla* config, uint8_t opcion_selecciona
         valores[2][0] = '\0';
         valores[3][0] = '\0';
     }
-    snprintf(valores[4], sizeof(valores[4]), "%.2fS", velocidad);
+    snprintf(valores[4], sizeof(valores[4]), "%.2f", velocidad);
     snprintf(valores[5], sizeof(valores[5]), "%s", resolucion == 0 ? "VGA" : "CGA");
     snprintf(valores[6], sizeof(valores[6]), "%s", cheats ? "SI" : "NO");
     valores[7][0] = '\0';
@@ -1196,6 +1362,13 @@ void menuConfiguracionDibujar(tConfigPantalla* config, uint8_t opcion_selecciona
 
         if (valores[i][0] != '\0') {
             hudPalabraDibujar(valores[i], x_val, y_op, i == opcion_seleccionada ? CC : CO, escala, config);
+            if (i == OPCIONES_OPCION_VELOCIDAD) {
+                uint16_t ancho_valor = hudTextoAncho(valores[i], escala);
+                uint16_t x_s = x_val + ancho_valor + 2;
+                uint16_t y_s = y_op + (ALTO_NUMERO - ALTO_LETRA) * escala;
+                uint8_t color_s = i == opcion_seleccionada ? CC : CO;
+                bitmapDibujar(&letra_S[0][0], x_s, y_s, 3, ALTO_LETRA, color_s, escala, config);
+            }
         }
 
         if (i == OPCIONES_OPCION_GUARDAR && confirmacion_guardado > 0) {

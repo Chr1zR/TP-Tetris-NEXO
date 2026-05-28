@@ -18,31 +18,35 @@ int partidaGuardar(tJuego* juego, const char* ruta)
     uint32_t magic = PARTIDA_MAGIC;
     uint16_t version = PARTIDA_VERSION;
 
-    if(fwrite(&magic, sizeof(magic), 1, f) != 1) ok = -1;
-    if(fwrite(&version, sizeof(version), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&magic, sizeof(magic), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&version, sizeof(version), 1, f) != 1) ok = -1;
 
-    if(fwrite(juego->config, sizeof(tConfigPantalla), 1, f) != 1) ok = -1;
-    if(fwrite(juego->estado, sizeof(tEstadoJuego), 1, f) != 1) ok = -1;
-    if(fwrite(juego->tablero->pieza_actual, sizeof(tTetromino), 1, f) != 1) ok = -1;
-    if(fwrite(juego->tablero->pieza_siguiente, sizeof(tTetromino), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(juego->config, sizeof(tConfigPantalla), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(juego->estado, sizeof(tEstadoJuego), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(juego->tablero->pieza_actual, sizeof(tTetromino), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(juego->tablero->pieza_siguiente, sizeof(tTetromino), 1, f) != 1) ok = -1;
 
-    for(uint8_t i = 0; i < juego->config->tablero.filas; i++) {
-        if(fwrite(juego->tablero->tablero[i], sizeof(unsigned char),
-                  juego->config->tablero.columnas, f) != juego->config->tablero.columnas)
-            ok = -1;
+    if(ok == 0) {
+        for(uint8_t i = 0; i < juego->config->tablero.filas; i++) {
+            if(fwrite(juego->tablero->tablero[i], sizeof(unsigned char),
+                      juego->config->tablero.columnas, f) != juego->config->tablero.columnas) {
+                ok = -1;
+                break;
+            }
+        }
     }
 
-    if(fwrite(juego->nombre_jugador, sizeof(juego->nombre_jugador), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(juego->nombre_jugador, sizeof(juego->nombre_jugador), 1, f) != 1) ok = -1;
 
     uint16_t seg = juego->seg_transcurrido;
     double intervalo = juego->intervalo_actual;
     uint8_t tolerancia = juego->en_tolerancia_fijacion ? 1 : 0;
     double intervalo_fij = juego->intervalo_fijacion;
 
-    if(fwrite(&seg, sizeof(seg), 1, f) != 1) ok = -1;
-    if(fwrite(&intervalo, sizeof(intervalo), 1, f) != 1) ok = -1;
-    if(fwrite(&tolerancia, sizeof(tolerancia), 1, f) != 1) ok = -1;
-    if(fwrite(&intervalo_fij, sizeof(intervalo_fij), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&seg, sizeof(seg), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&intervalo, sizeof(intervalo), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&tolerancia, sizeof(tolerancia), 1, f) != 1) ok = -1;
+    if(ok == 0 && fwrite(&intervalo_fij, sizeof(intervalo_fij), 1, f) != 1) ok = -1;
 
     fclose(f);
     return ok;
@@ -82,14 +86,14 @@ int partidaLeerInfo(const char* ruta, tInfoPartida* info)
     long board_offset = (long)cfg.tablero.filas * (long)cfg.tablero.columnas;
     if(fseek(f, board_offset, SEEK_CUR) != 0) { fclose(f); return -1; }
 
-    char nombre[20];
+    char nombre[sizeof(juego->nombre_jugador)];
     uint16_t seg;
     if(fread(nombre, sizeof(nombre), 1, f) != 1) { fclose(f); return -1; }
     if(fread(&seg, sizeof(seg), 1, f) != 1) { fclose(f); return -1; }
 
     fclose(f);
 
-    strcpy(info->nombre, nombre);
+    memcpy(info->nombre, nombre, sizeof(nombre));
     info->puntos = estado.puntos;
     info->nivel = estado.nivel;
     info->segundos = seg;
@@ -184,7 +188,7 @@ int partidaCargar(tJuego* juego, const char* ruta)
         }
     }
 
-    char nombre[20];
+    char nombre[sizeof(juego->nombre_jugador)];
     uint16_t seg;
     double intervalo;
     uint8_t tolerancia;
@@ -211,7 +215,7 @@ int partidaCargar(tJuego* juego, const char* ruta)
     if(ok != 0)
         return ok;
 
-    strcpy(juego->nombre_jugador, nombre);
+    memcpy(juego->nombre_jugador, nombre, sizeof(nombre));
     juego->seg_transcurrido = seg;
     juego->intervalo_actual = intervalo;
     juego->en_tolerancia_fijacion = (tolerancia != 0);

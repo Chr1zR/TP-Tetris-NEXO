@@ -5,6 +5,11 @@
 #include <string.h>
 #include <stdio.h>
 
+/**
+ * @desc Inicializa valores default de configuracion.
+ * @param c tConfigPantalla* Puntero a la configuracion.
+ * @return void
+ */
 static void configValoresDefault(tConfigPantalla* c)
 {
     c->ventana.ancho = 640;
@@ -27,6 +32,11 @@ void configGeometriaRecalcular(tConfigPantalla* c)
     anchosCalcular(c);
 }
 
+/**
+ * @desc Valida que los valores de configuracion sean correctos.
+ * @param c const tConfigPantalla* Puntero a la configuracion.
+ * @return bool true si valida, false si no.
+ */
 static bool configValidar(const tConfigPantalla* c)
 {
     if (c->ventana.ancho == 0 || c->ventana.alto == 0)

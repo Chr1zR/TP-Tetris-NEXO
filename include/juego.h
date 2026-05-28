@@ -37,8 +37,9 @@ typedef enum {
 #define PAUSA_CANT_OPCIONES 6
 
 #define GAME_OVER_OPCION_REINICIAR 0
-#define GAME_OVER_OPCION_SALIR 1
-#define GAME_OVER_CANT_OPCIONES 2
+#define GAME_OVER_OPCION_MENU 1
+#define GAME_OVER_OPCION_SALIR 2
+#define GAME_OVER_CANT_OPCIONES 3
 
 #define OPCIONES_OPCION_MODALIDAD 0
 #define OPCIONES_OPCION_COLUMNAS 1
@@ -106,9 +107,34 @@ typedef struct sJuego {
 } tJuego;
 
 
+/**
+ * @desc Crea e inicializa toda la estructura del juego.
+ * @param argc int Cantidad de argumentos.
+ * @param argv char** Vector de argumentos.
+ * @return tJuego* Puntero al juego o NULL si error.
+ */
 tJuego* juego_crear(int argc, char* argv[]);
+
+/**
+ * @desc Bucle principal del juego.
+ * @param argc int Cantidad de argumentos.
+ * @param argv char** Vector de argumentos.
+ * @return int Codigo de salida.
+ */
 int iniciar_juego(int argc, char* argv[]);
+
+/**
+ * @desc Reinicia el estado, tablero y piezas para nueva partida.
+ * @param juego tJuego* Puntero al juego.
+ * @return void
+ */
 void juego_reiniciar(tJuego* juego);
+
+/**
+ * @desc Libera toda la memoria del juego.
+ * @param juego tJuego* Puntero al juego.
+ * @return void
+ */
 void juego_destruir(tJuego* juego);
 
 #endif // JUEGO_H_INCLUDED

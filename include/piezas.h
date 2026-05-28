@@ -321,12 +321,63 @@ static const uint8_t tetromino_ESTRELLA_rotaciones[4][4][4] = {
     }
 };
 
+/**
+ * @desc Reserva memoria para un nuevo tetromino vacio.
+ * @return tTetromino* Puntero al tetromino o NULL si error.
+ */
 tTetromino* tetrominoCrear();
+
+/**
+ * @desc Asigna tipo y posicion aleatoria a un tetromino.
+ * @param t tTetromino* Puntero al tetromino.
+ * @param col uint8_t Cantidad de columnas del tablero.
+ * @param piezas_extras bool true para incluir piezas extra.
+ * @return void
+ */
 void tetrominoAleatorio(tTetromino* t, uint8_t col, bool piezas_extras);
+
+/**
+ * @desc Copia los datos de un tetromino a otro.
+ * @param destino tTetromino* Tetromino destino.
+ * @param origen tTetromino* Tetromino origen.
+ * @return void
+ */
 void tetrominoCopiar(tTetromino* destino, tTetromino* origen);
+
+/**
+ * @desc Rota un tetromino en el sentido indicado.
+ * @param tetro tTetromino* Puntero al tetromino.
+ * @param sentido_derecha bool true para derecha, false para izquierda.
+ * @return void
+ */
 void tetrominoRotar(tTetromino* tetro, bool sentido_derecha);
+
+/**
+ * @desc Incrementa la coordenada Y del tetromino.
+ * @param tetro tTetromino* Puntero al tetromino.
+ * @return void
+ */
 void tetrominoBajar(tTetromino* tetro);
+
+/**
+ * @desc Obtiene la matriz de rotacion para un tipo y angulo.
+ * @param tipo tTipoTetromino Tipo de tetromino.
+ * @param rotacion uint8_t Indice de rotacion (0-3).
+ * @return const uint8_t* Puntero a la matriz o NULL.
+ */
 const uint8_t* tetrominoObtenerMatrizRotacion(tTipoTetromino tipo, uint8_t rotacion);
+
+/**
+ * @desc Libera la memoria de un tetromino.
+ * @param t tTetromino* Puntero al tetromino.
+ * @return void
+ */
 void tTetromino_Destruir(tTetromino* t);
+
+/**
+ * @desc Calcula los limites ocupados de la matriz del tetromino.
+ * @param t tTetromino* Puntero al tetromino.
+ * @return void
+ */
 void tetrominoCalcularLimites(tTetromino* t);
 #endif // PIEZAS_H_INCLUDED

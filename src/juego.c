@@ -13,6 +13,12 @@
 
 //================ AYUDAS DE NAVEGACION =================
 
+/**
+ * @desc Obtiene la siguiente opcion visible del menu segun la modalidad.
+ * @param actual uint8_t Opcion actual seleccionada.
+ * @param modalidad uint8_t Modalidad de juego activa.
+ * @return uint8_t Siguiente opcion visible.
+ */
 static uint8_t opcionVisibleSiguiente(uint8_t actual, uint8_t modalidad){
     if(modalidad == 1){
         if(actual < OPCIONES_OPCION_VOLVER)
@@ -32,6 +38,12 @@ static uint8_t opcionVisibleSiguiente(uint8_t actual, uint8_t modalidad){
     return actual;
 }
 
+/**
+ * @desc Obtiene la opcion visible anterior del menu segun la modalidad.
+ * @param actual uint8_t Opcion actual seleccionada.
+ * @param modalidad uint8_t Modalidad de juego activa.
+ * @return uint8_t Opcion anterior visible.
+ */
 static uint8_t opcionVisibleAnterior(uint8_t actual, uint8_t modalidad){
     if(modalidad == 1){
         if(actual > OPCIONES_OPCION_MODALIDAD)
@@ -53,12 +65,22 @@ static uint8_t opcionVisibleAnterior(uint8_t actual, uint8_t modalidad){
 
 //================ AYUDAS DE LOGICA =================
 
+/**
+ * @desc Reinicia el temporizador de tolerancia de fijacion de pieza.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void toleranciaReiniciar(tJuego* juego) {
     if(juego->temporizador_fijacion)
         gbt_temporizador_destruir(juego->temporizador_fijacion);
     juego->temporizador_fijacion = gbt_temporizador_crear(juego->intervalo_fijacion);
 }
 
+/**
+ * @desc Cancela la tolerancia de fijacion de pieza.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void toleranciaCancelar(tJuego* juego) {
     juego->en_tolerancia_fijacion = false;
     if(juego->temporizador_fijacion) {
@@ -67,6 +89,11 @@ static void toleranciaCancelar(tJuego* juego) {
     }
 }
 
+/**
+ * @desc Guarda el puntaje actual del jugador en el ranking.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void rankingGuardarActual(tJuego* juego) {
     if(juego->ranking && juego->estado->puntos > 0) {
         ranking_agregar(juego->ranking, juego->nombre_jugador,
@@ -76,6 +103,12 @@ static void rankingGuardarActual(tJuego* juego) {
 
 //================ ENTRADAS POR ESTADO =================
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de presentacion.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputPresentacionProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ESCAPE) {
         juego->corriendo = 0;
@@ -128,6 +161,12 @@ static void inputPresentacionProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado durante el juego.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputJugandoProcesar(tJuego* juego, eGBT_Tecla tecla) {
     uint8_t cols = juego->config->tablero.columnas;
 
@@ -254,6 +293,12 @@ static void inputJugandoProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de pausa.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputPausaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_p) {
         juego->estado_pantalla = ESTADO_JUGANDO;
@@ -299,6 +344,12 @@ static void inputPausaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de game over.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputGameOverProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ARRIBA) {
         if(juego->opcion_game_over > 0)
@@ -316,6 +367,12 @@ static void inputGameOverProcesar(tJuego* juego, eGBT_Tecla tecla) {
             juego_reiniciar(juego);
             juego->estado_pantalla = ESTADO_JUGANDO;
         }
+        else if(juego->opcion_game_over == GAME_OVER_OPCION_MENU) {
+            rankingGuardarActual(juego);
+            juego_reiniciar(juego);
+            juego->estado_pantalla = ESTADO_PRESENTACION;
+            juego->opcion_presentacion = PRESENTACION_OPCION_START;
+        }
         else if(juego->opcion_game_over == GAME_OVER_OPCION_SALIR) {
             rankingGuardarActual(juego);
             juego->corriendo = 0;
@@ -329,6 +386,12 @@ static void inputGameOverProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado para confirmar salida.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputConfirmarSalidaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_s) {
         rankingGuardarActual(juego);
@@ -341,6 +404,12 @@ static void inputConfirmarSalidaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de cheats.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputPausaCheatsProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ESCAPE) {
         juego->estado_pantalla = ESTADO_PAUSA;
@@ -348,6 +417,12 @@ static void inputPausaCheatsProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en el menu de opciones.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputMenuOpcionesProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ESCAPE) {
         juego->estado_pantalla = ESTADO_PRESENTACION;
@@ -481,6 +556,12 @@ static void inputMenuOpcionesProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla acerca de.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputAcercaDeProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ESCAPE) {
         juego->estado_pantalla = ESTADO_PRESENTACION;
@@ -488,6 +569,12 @@ static void inputAcercaDeProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de cargar partida.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputCargarPartidaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(tecla == GBTK_ESCAPE) {
         juego->estado_pantalla = ESTADO_PRESENTACION;
@@ -518,6 +605,12 @@ static void inputCargarPartidaProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de puntajes.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputPuntajesProcesar(tJuego* juego, eGBT_Tecla tecla) {
     if(juego->confirmar_borrar_ranking) {
         if(tecla == GBTK_s) {
@@ -544,6 +637,12 @@ static void inputPuntajesProcesar(tJuego* juego, eGBT_Tecla tecla) {
     }
 }
 
+/**
+ * @desc Procesa la entrada del teclado en la pantalla de ingresar nombre.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputIngresarNombreProcesar(tJuego* juego, eGBT_Tecla tecla) {
     juego->frame_cursor++;
     if(juego->frame_cursor % 30 == 0)
@@ -592,15 +691,26 @@ static void inputIngresarNombreProcesar(tJuego* juego, eGBT_Tecla tecla) {
         }
     }
     else if(tecla == GBTK_ESCAPE) {
-        strcpy(juego->buffer_nombre, "JUGADOR1");
-        juego->cursor_nombre = 8;
-        juego->buffer_nombre[juego->cursor_nombre] = '\0';
-        strcpy(juego->nombre_jugador, juego->buffer_nombre);
-        juego->estado_pantalla = ESTADO_JUGANDO;
+        if(juego->cursor_nombre > 0) {
+            strcpy(juego->buffer_nombre, "JUGADOR1");
+            juego->cursor_nombre = 8;
+            juego->buffer_nombre[juego->cursor_nombre] = '\0';
+            strcpy(juego->nombre_jugador, juego->buffer_nombre);
+            juego->estado_pantalla = ESTADO_JUGANDO;
+        } else {
+            juego->estado_pantalla = ESTADO_PRESENTACION;
+            juego->opcion_presentacion = PRESENTACION_OPCION_START;
+        }
         juego->redibujar_hud = 1;
     }
 }
 
+/**
+ * @desc Delega el procesamiento de entrada segun el estado actual de pantalla.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @param tecla eGBT_Tecla Tecla presionada.
+ * @return void Sin retorno.
+ */
 static void inputProcesar(tJuego* juego, eGBT_Tecla tecla) {
     switch(juego->estado_pantalla) {
         case ESTADO_PRESENTACION:
@@ -641,6 +751,11 @@ static void inputProcesar(tJuego* juego, eGBT_Tecla tecla) {
 
 //================ UPDATE POR ESTADO =================
 
+/**
+ * @desc Actualiza temporizadores de confirmacion segun el estado de pantalla.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void updateProcesar(tJuego* juego) {
     if(juego->estado_pantalla == ESTADO_PAUSA) {
         if(juego->pausa_confirmacion_guardado > 0 && juego->pausa_confirmacion_guardado < 255)
@@ -654,6 +769,11 @@ static void updateProcesar(tJuego* juego) {
 
 //================ RENDER POR ESTADO =================
 
+/**
+ * @desc Renderiza la pantalla de juego activo.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void juegoRenderizar(tJuego* juego) {
     if(juego->redibujar_hud) {
         fondoHudDibujar(juego->config);
@@ -711,26 +831,56 @@ static void juegoRenderizar(tJuego* juego) {
     }
 }
 
+/**
+ * @desc Renderiza la pantalla de presentacion.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void presentacionRenderizar(tJuego* juego) {
     presentarPantallaDibujar(juego->config, juego->opcion_presentacion);
 }
 
+/**
+ * @desc Renderiza la pantalla de pausa.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void pausaRenderizar(tJuego* juego) {
     cubrirPausaDibujar(juego->config, juego->opcion_seleccionada, juego->pausa_confirmacion_guardado);
 }
 
+/**
+ * @desc Renderiza la pantalla de cheats en pausa.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void pausaCheatsRenderizar(tJuego* juego) {
     pausaCheatsDibujar(juego->config);
 }
 
+/**
+ * @desc Renderiza la pantalla de game over.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void gameOverRenderizar(tJuego* juego) {
     cubrirGameOverDibujar(juego->config, juego->estado->puntos, juego->estado->lineas_limpias, juego->nombre_jugador, juego->opcion_game_over);
 }
 
+/**
+ * @desc Renderiza la pantalla de confirmar salida.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void confirmarSalidaRenderizar(tJuego* juego) {
     cubrirConfirmarSalidaDibujar(juego->config);
 }
 
+/**
+ * @desc Renderiza el menu de opciones.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void menuOpcionesRenderizar(tJuego* juego) {
     menuConfiguracionDibujar(juego->config, juego->opcion_opciones,
         juego->opcion_seleccion_modalidad,
@@ -743,10 +893,20 @@ static void menuOpcionesRenderizar(tJuego* juego) {
         juego->config->cheats_habilitados);
 }
 
+/**
+ * @desc Renderiza la pantalla acerca de.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void acercaDeRenderizar(tJuego* juego) {
     pantallaAcercaDeDibujar(juego->config);
 }
 
+/**
+ * @desc Renderiza la pantalla de cargar partida.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void cargarPartidaRenderizar(tJuego* juego) {
     bool hay = partidaExiste(PARTIDA_ARCHIVO);
     tInfoPartida info = {0};
@@ -756,15 +916,30 @@ static void cargarPartidaRenderizar(tJuego* juego) {
                                  info.nivel, info.lineas, info.segundos, juego->cargar_mensaje);
 }
 
+/**
+ * @desc Renderiza la pantalla de puntajes.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void puntajesRenderizar(tJuego* juego) {
     pantallaPuntajesDibujar(juego->config, juego->ranking, juego->confirmar_borrar_ranking);
 }
 
+/**
+ * @desc Renderiza la pantalla de ingresar nombre.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void ingresarNombreRenderizar(tJuego* juego) {
     pantallaIngresarNombreDibujar(juego->config, juego->buffer_nombre,
         juego->cursor_nombre, juego->cursor_visible);
 }
 
+/**
+ * @desc Delega el renderizado segun el estado actual de pantalla.
+ * @param juego tJuego* Puntero al estado del juego.
+ * @return void Sin retorno.
+ */
 static void renderizarPantalla(tJuego* juego) {
     switch(juego->estado_pantalla) {
         case ESTADO_PRESENTACION:
