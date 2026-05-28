@@ -86,7 +86,7 @@ int partidaLeerInfo(const char* ruta, tInfoPartida* info)
     long board_offset = (long)cfg.tablero.filas * (long)cfg.tablero.columnas;
     if(fseek(f, board_offset, SEEK_CUR) != 0) { fclose(f); return -1; }
 
-    char nombre[sizeof(juego->nombre_jugador)];
+    char nombre[sizeof(info->nombre)];
     uint16_t seg;
     if(fread(nombre, sizeof(nombre), 1, f) != 1) { fclose(f); return -1; }
     if(fread(&seg, sizeof(seg), 1, f) != 1) { fclose(f); return -1; }
